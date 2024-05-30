@@ -1,0 +1,19 @@
+server:
+  port: 8081
+spring:
+  liquibase:
+    enabled: false
+  application:
+    name: user-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/AET_HITS
+    username: docker
+    password: docker
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    bootstrap-servers: localhost:9092
+
+spring.config.import: classpath:/security-config.yml
