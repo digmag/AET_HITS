@@ -17,7 +17,8 @@
 	<modules>
 		<module>common</module>
 		<module>user-app</module>
-	</modules>
+        <module>notification-app</module>
+    </modules>
 	<properties>
 		<java.version>17</java.version>
 		<spring.version>3.2.2</spring.version>

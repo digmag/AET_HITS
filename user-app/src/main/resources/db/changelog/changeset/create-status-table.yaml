@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-status
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: work_status
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
