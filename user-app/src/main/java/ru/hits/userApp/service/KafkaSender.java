@@ -26,13 +26,13 @@ public class KafkaSender {
                 pool
         ));
     }
-    public void sendRecoveryMessage(EmployeeEntity employee){
+    public void sendRecoveryMessage(EmployeeEntity employee, UUID id){
         List<String> pool = new ArrayList<>(){};
         pool.add(PoolMessage.EMAIL);
         kafkaTemplate.send("recovery", new MessageDTO(
                 employee.getEmail(),
                 "Письмо для восстановления пароля",
-                "Для восстановления пароля перейдите по ссылке: http://localhost:5000/recovery/"+employee.getId(),
+                "Для восстановления пароля перейдите по ссылке: http://localhost:5000/recovery/"+id,
                 pool
         ));
     }

@@ -10,8 +10,10 @@ import ru.hits.common.security.exception.BadRequestException;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
 import ru.hits.userApp.entity.EmployeeEntity;
+import ru.hits.userApp.entity.RecoveryMessageEntity;
 import ru.hits.userApp.entity.StatusEntity;
 import ru.hits.userApp.repository.EmployeeRepository;
+import ru.hits.userApp.repository.RecoveryRepository;
 import ru.hits.userApp.repository.StatusRepository;
 
 import java.util.Optional;
@@ -27,6 +29,7 @@ public class UserService {
     private final StatusRepository statusRepository;
     private final KafkaSender kafkaSender;
     private final AuthenticationService authenticationService;
+    private final RecoveryRepository recoveryRepository;
     @Transactional
     public ResponseEntity<?> registration(RegistrationDTO registrationDTO){
         if(registrationDTO.getFullName().isEmpty() ||
@@ -82,18 +85,29 @@ public class UserService {
         if(employee.isEmpty()){
             throw new NotFoundException("Пользователь не найден");
         }
-        kafkaSender.sendRecoveryMessage(employee.get());
+        RecoveryMessageEntity recoveryMessageEntity = new RecoveryMessageEntity(
+                UUID.randomUUID(),
+                employee.get(),
+                false
+        );
+        kafkaSender.sendRecoveryMessage(employee.get(), recoveryMessageEntity.getId());
+        recoveryRepository.save(recoveryMessageEntity);
         return ResponseEntity.ok(null);
     }
 
     @Transactional
     public ResponseEntity<?> recoverId(UUID id, RecoverPasswordDTO recoverPasswordDTO){
-        Optional<EmployeeEntity> employee = employeeRepository.findById(id);
-        if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
+        Optional<RecoveryMessageEntity> recoveryMessageEntity = recoveryRepository.findById(id);
+        if(recoveryMessageEntity.isEmpty()){
+            throw new NotFoundException("Запрос на смену пароля не найден");
         }
-        employee.get().setPassword(securityConfig.bCryptPasswordEncoder().encode(recoverPasswordDTO.getPassword()));
-        employeeRepository.save(employee.get());
+        if(recoveryMessageEntity.get().isEnd()){
+            throw new ForbiddenException("Нельзя заменить пароль по этому запросу");
+        }
+        recoveryMessageEntity.get().getEmployee().setPassword(securityConfig.bCryptPasswordEncoder().encode(recoverPasswordDTO.getPassword()));
+        recoveryMessageEntity.get().setEnd(true);
+        employeeRepository.save(recoveryMessageEntity.get().getEmployee());
+        recoveryRepository.save(recoveryMessageEntity.get());
         return ResponseEntity.ok("Пароль изменен");
     }
 
