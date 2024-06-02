@@ -3,6 +3,10 @@ app:
     jwtToken:
       permit-all:
         - /api/account/registration
+        - /api/account/login
+        - /api/account/verification
+        - /api/account/recover/**
+        - /api/account/recover
       root-path: /api
       secret: qqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrttty
       expiration: 1800000

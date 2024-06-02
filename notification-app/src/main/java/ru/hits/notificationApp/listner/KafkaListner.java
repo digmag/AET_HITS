@@ -10,8 +10,13 @@ import ru.hits.notificationApp.service.NotificationService;
 @RequiredArgsConstructor
 public class KafkaListner {
     private final NotificationService notificationService;
-    @KafkaListener(topics = "registration", groupId = "registration")
-    public void userNotification(MessageDTO notificationDTO){
+    @KafkaListener(topics = "registration", groupId = "user-app")
+    public void userNotification(MessageDTO messageDTO){
+        notificationService.sendMessage(messageDTO);
+    }
 
+    @KafkaListener(topics = "recovery", groupId = "user-app")
+    public void userNotificationRecovery(MessageDTO messageDTO){
+        notificationService.sendMessage(messageDTO);
     }
 }
