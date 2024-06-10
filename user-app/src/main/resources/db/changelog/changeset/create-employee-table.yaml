@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-employee
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: employee
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fullname
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: admin
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: verification
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: employee
+            baseColumnNames: [ status ]
+            referencedTableName: work_status
+            referencedColumnNames: [ id ]
+            constraintName: FK_employee_status
