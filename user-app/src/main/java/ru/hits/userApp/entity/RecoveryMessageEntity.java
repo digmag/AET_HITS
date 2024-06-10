@@ -11,7 +11,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "RecoveryMessage")
+@Table(name = "recovery_message")
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecoveryMessageEntity {
@@ -20,5 +20,6 @@ public class RecoveryMessageEntity {
     @ManyToOne
     @JoinColumn(name = "employee_id", referencedColumnName = "id")
     private EmployeeEntity employee;
+    @Column(name="is_end")
     private boolean isEnd;
 }

@@ -7,8 +7,8 @@ spring:
     name: notification-app
   datasource:
     url: jdbc:postgresql://localhost:5432/AET_HITS
-    username: docker
-    password: docker
+    username: admin
+    password: root
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -24,5 +24,7 @@ spring:
           auth: true
           starttls:
             enable: true
+  kafka:
+    bootstrap-servers: kafka:9092
 
 spring.config.import: classpath:/security-config.yml

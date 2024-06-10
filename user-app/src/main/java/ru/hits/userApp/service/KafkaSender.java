@@ -22,7 +22,12 @@ public class KafkaSender {
         kafkaTemplate.send("registration",new MessageDTO(
                 employee.getEmail(),
                 "Подтвердите свою учетную запись",
-                "Подтвердите свою учетную запись по адресу http://localhost:5000/confirm?id="+employee.getId(),
+                "<html>" +
+                        "<body style='display: flex; flex-direction: row; justify-content: center;'>"+
+                        "<h1>Для подтверждения своего аккаунта перейдите по ссылке ниже</h1>"+
+                        "<a>http://localhost:5000/verification?id="+employee.getId()+"</a>"+
+                        "</body>"+
+                        "</html>",
                 pool
         ));
     }
