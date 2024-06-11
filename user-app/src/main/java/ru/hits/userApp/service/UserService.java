@@ -67,7 +67,7 @@ public class UserService {
     public ResponseEntity<?> login(LoginDTO loginDTO){
         Optional<EmployeeEntity> employee = employeeRepository.findByEmail(loginDTO.getEmail());
         if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден.");
+            throw new BadRequestException("Не верный логин.");
         }
         if(!employee.get().isVerification()){
             throw new ForbiddenException("Пользователь не подтвердил аккаунт.");
@@ -121,6 +121,15 @@ public class UserService {
         employeeRepository.save(employee.get());
         return ResponseEntity.ok("Пользователь подтвержден");
     }
+
+    @Transactional
+    public ResponseEntity<?> getStatus(String name){
+        if(name.isEmpty()){
+            return ResponseEntity.ok(statusRepository.findAll());
+        }
+        return ResponseEntity.ok(statusRepository.findAllByStatus(name));
+    }
+
     private boolean validateEmail(String login){
         Pattern pattern = Pattern.compile("[A-Za-z0-9]+\\@[A-Za-z0-9]+\\.[A-Za-z0-9]+");
         return pattern.matcher(login).matches();

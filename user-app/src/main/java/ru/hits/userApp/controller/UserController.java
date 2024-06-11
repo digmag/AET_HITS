@@ -1,5 +1,6 @@
 package ru.hits.userApp.controller;
 
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +41,10 @@ public class UserController {
     @PutMapping("/verification/{id}")
     public ResponseEntity<?> verification(@PathVariable UUID id){
         return userService.verification(id);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> StatusByName(@RequestParam(name = "name", defaultValue = "") String name){
+        return userService.getStatus(name);
     }
 }
