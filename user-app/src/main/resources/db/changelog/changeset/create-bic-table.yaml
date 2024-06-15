@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-bic
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: bic
+            columns:
+              - column:
+                  name: code
+                  type: integer
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: bank_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bill
+                  type: varchar(255)
+                  constraints:
+                    nullable: false

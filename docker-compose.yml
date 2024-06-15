@@ -40,6 +40,7 @@ services:
       - db
       - kafka
       - user-app
+      - doc-core
     ports:
       - "8084:8084"
     environment:
@@ -50,7 +51,23 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     networks:
       - my-network
-
+  doc-core:
+    container_name: doc-core
+    build:
+      context: doc-core
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db
+      - kafka
+      - user-app
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db/AET_HITS
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   kafka:
     image: 'bitnami/kafka:latest'
     container_name: kafka

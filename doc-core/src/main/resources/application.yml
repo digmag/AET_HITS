@@ -1,8 +1,8 @@
 server:
-  port: 8081
+  port: 8083
 spring:
   liquibase:
-    enabled: true
+    enabled: false
   application:
     name: core-app
   datasource:
