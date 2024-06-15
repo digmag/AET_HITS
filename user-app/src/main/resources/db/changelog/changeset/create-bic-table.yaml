@@ -19,7 +19,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: address
-                  type: integer
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
