@@ -20,7 +20,7 @@ public class ClientEntity {
     @Column(name="face_type")
     private String faceType;
     @ManyToOne
-    @JoinColumn(name = "bic", referencedColumnName = "id")
+    @JoinColumn(name = "bic", referencedColumnName = "code")
     private BICEntity bic;
     @Column(name = "unique_tax_number")
     private String INN;
