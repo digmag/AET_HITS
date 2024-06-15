@@ -4,7 +4,7 @@ spring:
   liquibase:
     enabled: true
   application:
-    name: user-app
+    name: core-app
   datasource:
     url: jdbc:postgresql://localhost:5432/AET_HITS
     username: admin
