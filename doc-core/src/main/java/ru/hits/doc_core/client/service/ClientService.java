@@ -28,7 +28,7 @@ public class ClientService {
     private final OPFRepository opfRepository;
 
     @Transactional
-    public ResponseEntity<?> create(Authentication authentication, CreateDTO clientCreateDTO){
+    public ResponseEntity<?> create(CreateDTO clientCreateDTO){
         Optional<BICEntity> bic = bicRepository.findById(clientCreateDTO.getBicId());
         if(bic.isEmpty()){
             throw new NotFoundException("Не удалось найти код БИК");

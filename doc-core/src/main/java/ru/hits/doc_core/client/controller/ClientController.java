@@ -16,7 +16,7 @@ import ru.hits.doc_core.client.service.ClientService;
 public class ClientController {
     private ClientService clientService;
     @PostMapping("/create")
-    public ResponseEntity<?> create(Authentication authentication, @RequestBody CreateDTO clientCreateDTO){
-        return clientService.create(authentication,clientCreateDTO);
+    public ResponseEntity<?> create(@RequestBody CreateDTO clientCreateDTO){
+        return clientService.create(clientCreateDTO);
     }
 }
