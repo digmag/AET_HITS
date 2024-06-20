@@ -6,7 +6,7 @@ spring:
   application:
     name: core-app
   datasource:
-    url: jdbc:postgresql://localhost:5432/AET_HITS
+    url: jdbc:postgresql://51.250.108.202:15432/AET_HITS
     username: admin
     password: root
     driver-class-name: org.postgresql.Driver

@@ -30,8 +30,6 @@ databaseChangeLog:
               - column:
                   name: cpp
                   type: varchar(255)
-                  constraints:
-                    nullable: false
               - column:
                   name: opf
                   type: integer

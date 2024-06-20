@@ -33,21 +33,21 @@ public class ClientService {
         if(bic.isEmpty()){
             throw new NotFoundException("Не удалось найти код БИК");
         }
-        Optional<OPFEntity> opf = opfRepository.findById(clientCreateDTO.getOPF());
-        if(opf.isEmpty() && (clientCreateDTO.getOPF() != null)){
+        Optional<OPFEntity> opf = opfRepository.findById(clientCreateDTO.getOpf());
+        if(opf.isEmpty() && (clientCreateDTO.getOpf() != null)){
             throw new NotFoundException("Организационно правовая форма не найдена в справочнике");
         }
         ClientEntity client = new ClientEntity(
                 UUID.randomUUID(),
                 clientCreateDTO.isClientType()?"PHYSICAL":"LAW",
                 bic.get(),
-                clientCreateDTO.getINN(),
-                clientCreateDTO.getCPP(),
+                clientCreateDTO.getInn(),
+                clientCreateDTO.getCpp(),
                 opf.orElse(null),
                 clientCreateDTO.getFullName(),
                 !clientCreateDTO.getShortName().isEmpty()?clientCreateDTO.getShortName():"",
-                clientCreateDTO.getCEOFullName(),
-                clientCreateDTO.getCEOStatus(),
+                clientCreateDTO.getCeoFullName(),
+                clientCreateDTO.getCeoStatus(),
                 clientCreateDTO.getAddress(),
                 clientCreateDTO.getPhone(),
                 clientCreateDTO.getEmail(),

@@ -3,6 +3,7 @@ package ru.hits.common.dtos.client;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 @Data
 @AllArgsConstructor
@@ -10,13 +11,13 @@ import lombok.NoArgsConstructor;
 public class CreateDTO {
     private boolean clientType;
     private Integer bicId;
-    private String INN;
-    private String CPP;
-    private Integer OPF;
+    private String inn;
+    private String cpp;
+    private Integer opf;
     private String fullName;
     private String shortName;
-    private String CEOFullName;
-    private String CEOStatus;
+    private String ceoFullName;
+    private String ceoStatus;
     private String address;
     private String phone;
     private String email;
