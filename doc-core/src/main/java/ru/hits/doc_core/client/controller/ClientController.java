@@ -3,12 +3,11 @@ package ru.hits.doc_core.client.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.client.CreateDTO;
 import ru.hits.doc_core.client.service.ClientService;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,5 +17,15 @@ public class ClientController {
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody CreateDTO clientCreateDTO){
         return clientService.create(clientCreateDTO);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(Authentication authentication, @PathVariable UUID id){
+        return clientService.delete(authentication, id);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getClientById(@PathVariable UUID id){
+        return  clientService.getClient(id);
     }
 }
