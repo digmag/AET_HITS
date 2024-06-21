@@ -28,4 +28,11 @@ public class ClientController {
     public ResponseEntity<?> getClientById(@PathVariable UUID id){
         return  clientService.getClient(id);
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> list(
+            @RequestParam(name = "page", defaultValue = "5") Integer page
+    ){
+        return clientService.list(page);
+    }
 }

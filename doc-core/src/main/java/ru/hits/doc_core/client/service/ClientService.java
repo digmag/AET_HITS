@@ -1,6 +1,9 @@
 package ru.hits.doc_core.client.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -133,7 +136,12 @@ public class ClientService {
     }
 
     public ResponseEntity<?> list (Integer page){
-        return null;
+        page = page==null? 0: page;
+        Page<ClientEntity> clientEntityPage = clientRepository.clientList(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName")));
+        if(page>clientEntityPage.getTotalPages()){
+            throw new NotFoundException("Страница не найдена");
+        }
+        return ResponseEntity.ok(clientEntityPage);
     }
 
     @Transactional
