@@ -136,7 +136,7 @@ public class ClientService {
 
     public ResponseEntity<?> list (Integer page){
         page = page==null? 0: page;
-        Page<ClientEntity> clientEntityPage = clientRepository.findAllClients(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName")));
+        Page<ClientEntity> clientEntityPage = clientRepository.findAll(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName")));
         if(page>clientEntityPage.getTotalPages()){
             throw new NotFoundException("Страница не найдена");
         }
