@@ -8,10 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hits.common.dtos.client.BicDTO;
-import ru.hits.common.dtos.client.ClientFullResponseDTO;
-import ru.hits.common.dtos.client.ClientShortResponseDTO;
-import ru.hits.common.dtos.client.CreateDTO;
+import ru.hits.common.dtos.client.*;
 import ru.hits.common.security.JwtUserData;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
@@ -23,6 +20,8 @@ import ru.hits.doc_core.client.repository.ClientRepository;
 import ru.hits.doc_core.client.repository.EmployeeRepository;
 import ru.hits.doc_core.client.repository.OPFRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -141,7 +140,20 @@ public class ClientService {
         if(page>clientEntityPage.getTotalPages()){
             throw new NotFoundException("Страница не найдена");
         }
-        return ResponseEntity.ok(clientEntityPage);
+        List<ClientShortResponseDTO> clientShortResponseDTOS = new ArrayList<>();
+        clientEntityPage.forEach(clientEntity -> {
+            clientShortResponseDTOS.add(new ClientShortResponseDTO(
+                    clientEntity.getId(),
+                    clientEntity.getFaceType(),
+                    clientEntity.getFullName(),
+                    clientEntity.getCEOFullName(),
+                    clientEntity.getINN(),
+                    clientEntity.getPhone(),
+                    clientEntity.getEmail()
+            ));
+        });
+        PageDTO pageDTO = new PageDTO(clientShortResponseDTOS, page, clientEntityPage.getTotalPages());
+        return ResponseEntity.ok(pageDTO);
     }
 
     @Transactional
