@@ -10,5 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientEntity, UUID> {
-    Page<ClientEntity> clientList(Pageable pageable);
+
+    Page<ClientEntity> findAllClients(Pageable pageable);
 }
