@@ -29,7 +29,7 @@ public class ClientController {
         return  clientService.getClient(id);
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<?> list(
             @RequestParam(name = "page", defaultValue = "5") Integer page
     ){
