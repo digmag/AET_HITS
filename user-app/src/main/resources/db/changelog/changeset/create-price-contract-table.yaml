@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-price_contract
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: price_contract
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: price_list
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contract
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - addForeignKeyConstraint:
+                  baseTableName: price_contract
+                  baseColumnNames: [ price_list ]
+                  referencedTableName: price_list
+                  referencedColumnNames: [ id ]
+                  constraintName: FK_price_price
+              - addForeignKeyConstraint:
+                  baseTableName: price_contract
+                  baseColumnNames: [ contract ]
+                  referencedTableName: contract
+                  referencedColumnNames: [ id ]
+                  constraintName: FK_price_contract
