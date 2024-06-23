@@ -1,9 +1,10 @@
 package ru.hits.userApp.controller;
 
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.hits.common.dtos.admin.WorkStatusCreateDTO;
 import ru.hits.common.dtos.user.LoginDTO;
 import ru.hits.common.dtos.user.RecoverDTO;
 import ru.hits.common.dtos.user.RecoverPasswordDTO;
@@ -46,5 +47,28 @@ public class UserController {
     @GetMapping("/status")
     public ResponseEntity<?> StatusByName(@RequestParam(name = "name", defaultValue = "") String name){
         return userService.getStatus(name);
+    }
+
+    @PostMapping("/add/status")
+    public ResponseEntity<?> addWorkStatus(@RequestBody WorkStatusCreateDTO workStatusCreateDTO, Authentication authentication){
+        //Добавление должности
+        return userService.addWorkStatus(authentication, workStatusCreateDTO);
+    }
+
+    @PutMapping("/status/{id}")
+    public ResponseEntity<?> editWorkStatus(@RequestBody WorkStatusCreateDTO workStatusCreateDTO, @PathVariable UUID id, Authentication authentication){
+        //Изменение должности
+        return userService.editStatus(authentication,workStatusCreateDTO,id);
+    }
+
+    @GetMapping("/workers")
+    public ResponseEntity<?> listWorkers(){
+        //Получение списка работников
+        return userService.listWorkers();
+    }
+
+    @GetMapping("/isAdmin")
+    public ResponseEntity<?> isAdmin(Authentication authentication){
+        return userService.isAdmin(authentication);
     }
 }
