@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changeset/create-opf-table.yaml
   - include:
       file: db/changelog/changeset/create-client-table.yaml
+  - include:
+      file: db/changelog/changeset/create-pricelist-table.yaml
