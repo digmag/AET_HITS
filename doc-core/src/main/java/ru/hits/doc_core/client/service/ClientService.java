@@ -181,4 +181,17 @@ public class ClientService {
                 )
         );
     }
+    public ResponseEntity<?> getBic(String name){
+        if(name.isEmpty()){
+            return ResponseEntity.ok(bicRepository.findAll());
+        }
+        return ResponseEntity.ok(bicRepository.findAllByBankName(name));
+    }
+
+    public ResponseEntity<?> getOpf(String name){
+        if(name.isEmpty()){
+            return ResponseEntity.ok(opfRepository.findAll());
+        }
+        return ResponseEntity.ok(opfRepository.findAllByName(name));
+    }
 }

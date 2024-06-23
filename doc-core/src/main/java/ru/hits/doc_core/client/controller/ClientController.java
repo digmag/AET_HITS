@@ -35,4 +35,14 @@ public class ClientController {
     ){
         return clientService.list(page);
     }
+
+    @GetMapping("/bic")
+    public ResponseEntity<?> bicList(@RequestParam(name = "name", defaultValue = "")String name){
+        return clientService.getBic(name);
+    }
+
+    @GetMapping("/opf")
+    public ResponseEntity<?> opfList(@RequestParam(name = "name", defaultValue = "") String name){
+        return clientService.getOpf(name);
+    }
 }
