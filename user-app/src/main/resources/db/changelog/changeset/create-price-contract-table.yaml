@@ -22,15 +22,15 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     nullable: false
-              - addForeignKeyConstraint:
-                  baseTableName: price_contract
-                  baseColumnNames: [ price_list ]
-                  referencedTableName: price_list
-                  referencedColumnNames: [ id ]
-                  constraintName: FK_price_price
-              - addForeignKeyConstraint:
-                  baseTableName: price_contract
-                  baseColumnNames: [ contract ]
-                  referencedTableName: contract
-                  referencedColumnNames: [ id ]
-                  constraintName: FK_price_contract
+        - addForeignKeyConstraint:
+            baseTableName: price_contract
+            baseColumnNames: [ price_list ]
+            referencedTableName: price_list
+            referencedColumnNames: [ id ]
+            constraintName: FK_price_price
+        - addForeignKeyConstraint:
+            baseTableName: price_contract
+            baseColumnNames: [ contract ]
+            referencedTableName: contract
+            referencedColumnNames: [ id ]
+            constraintName: FK_price_contract
