@@ -19,6 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ContractEntity {
+    @Id
     private UUID id;
     private int number;
     private LocalDate date;

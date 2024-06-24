@@ -18,11 +18,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: client
-                  type: uuid
-                  constraints:
-                    nullable: false
-              - column:
                   name: price
                   type: real
                   constraints:
