@@ -2,8 +2,10 @@ package ru.hits.doc_core.doc.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.doc.PriceListCreateDTO;
+import ru.hits.doc_core.doc.service.DocumentService;
 
 import java.util.UUID;
 
@@ -11,29 +13,30 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/document")
 public class DocumentController {
+    private final DocumentService documentService;
 
     @GetMapping("/price")
     public ResponseEntity<?> getListOfPrice(@RequestParam(name = "name", defaultValue = "") String name){
         //Получение сущностей прайслиста
-        return null;
+        return documentService.priceListList(name);
     }
 
     @PostMapping("/price")
-    public ResponseEntity<?> addToPriceList(@RequestBody PriceListCreateDTO priceListElement){
+    public ResponseEntity<?> addToPriceList(@RequestBody PriceListCreateDTO priceListElement, Authentication authentication){
         //Добавление элемента в прайслист
-        return null;
+        return documentService.createPriceListPosition(priceListElement,authentication);
     }
 
     @PutMapping("/price/{id}")
-    public ResponseEntity<?> addToPriceList(@RequestBody PriceListCreateDTO priceListElement, @PathVariable UUID id){
+    public ResponseEntity<?> addToPriceList(@RequestBody PriceListCreateDTO priceListElement, @PathVariable UUID id, Authentication authentication){
         //Изменение элемента в прайслист
-        return null;
+        return documentService.editPriceList(priceListElement, id, authentication);
     }
 
     @DeleteMapping("/price")
-    public ResponseEntity<?> deleteFromPriceList(@PathVariable UUID id){
+    public ResponseEntity<?> deleteFromPriceList(@PathVariable UUID id, Authentication authentication){
         //Удаление из прайслиста
-        return null;
+        return documentService.deletePriceList(id, authentication);
     }
 
 

@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class PriceListCreateDTO {
     private String law;
     private String name;
-    private double price;
+    private Double price;
 }
