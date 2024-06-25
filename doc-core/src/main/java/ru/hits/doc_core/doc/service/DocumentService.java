@@ -57,7 +57,7 @@ public class DocumentService {
         if(name.isEmpty()){
             return ResponseEntity.ok(priceListRepository.findAll());
         }
-        return ResponseEntity.ok(priceListRepository.findAllLikeName(name));
+        return ResponseEntity.ok(priceListRepository.findByNameStartsWith(name));
     }
 
     @Transactional

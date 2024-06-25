@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface PriceListRepository extends JpaRepository<PriceListEntity, UUID> {
-    List<PriceListEntity> findAllLikeName(String name);
+    List<PriceListEntity> findByNameStartsWith(String name);
 }
