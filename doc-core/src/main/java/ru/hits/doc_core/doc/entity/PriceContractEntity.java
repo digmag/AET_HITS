@@ -25,4 +25,6 @@ public class PriceContractEntity {
     @ManyToOne
     @JoinColumn(name = "contract", referencedColumnName = "id")
     private ContractEntity contract;
+
+    private Integer count;
 }

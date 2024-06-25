@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.hits.common.dtos.contract.ContractCreateDTO;
 import ru.hits.common.dtos.doc.PriceListCreateDTO;
 import ru.hits.doc_core.doc.service.DocumentService;
 
@@ -59,7 +60,7 @@ public class DocumentController {
     }
 
     @PostMapping("/contract/create")
-    public ResponseEntity<?> contractCreate(/*Тело запроса*/){
-        return null;
+    public ResponseEntity<?> contractCreate(@RequestBody ContractCreateDTO createDTO){
+        return documentService.createContract(createDTO);
     }
 }
