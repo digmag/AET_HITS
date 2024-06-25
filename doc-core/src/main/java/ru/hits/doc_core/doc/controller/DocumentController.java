@@ -44,19 +44,19 @@ public class DocumentController {
     @GetMapping("/contract")
     public ResponseEntity<?> listOfContracts(/*Добавить фильтры*/){
         //Получение списка договоров
-        return null;
+        return documentService.listOfContracts();
     }
 
     @GetMapping("/contract/{id}")
     public ResponseEntity<?> concreteContract(@PathVariable UUID id){
         //Получение конкретного контракта
-        return null;
+        return documentService.concreteContract(id);
     }
 
     @GetMapping("/contract/client/{id}")
     public ResponseEntity<?> clientContracts(@PathVariable UUID id){
         //Получение договоров клиентов
-        return null;
+        return documentService.clientCotracts(id);
     }
 
     @PostMapping("/contract/create")

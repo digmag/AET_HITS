@@ -25,6 +25,7 @@ import ru.hits.doc_core.doc.repository.ContractRepository;
 import ru.hits.doc_core.doc.repository.PriceListRepository;
 import ru.hits.doc_core.doc.repository.PriceContractRepository;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -143,6 +144,11 @@ public class DocumentService {
                     throw new BadRequestException("Выбраны договоры с объемом");
                 }
             }
+            else{
+                if(pos.getCount()!=null){
+                    throw new BadRequestException("Выбраны договоры без объема");
+                }
+            }
             if(priceListPosition.isEmpty()){
                 throw new NotFoundException("Позиция прайслиста не найдена");
             }
@@ -160,7 +166,7 @@ public class DocumentService {
         ContractEntity contract = new ContractEntity(
                 UUID.randomUUID(),
                 createDTO.getNumber(),
-                createDTO.getStartDate(),
+                LocalDate.now(),
                 client.get(),
                 createDTO.getVolume(),
                 customPrice.get(),
@@ -215,5 +221,161 @@ public class DocumentService {
                 contract.isEnd(),
                 priceListResponseDTOS
         ));
+    }
+
+    @Transactional
+    public ResponseEntity<?> listOfContracts(/*Фильтры*/){
+        List<ContractEntity> contracts = contractRepository.findAll();
+        List<ContractResponseDTO> contractsDTOS = new ArrayList<>();
+        contracts.forEach(contract -> {
+            List<PriceListResponseDTO> priceListResponseDTOS = new ArrayList<>();
+            priceContractRepository.findAllByContract(contract).forEach(priceContract -> {
+                priceListResponseDTOS.add(new PriceListResponseDTO(
+                        priceContract.getId(),
+                        priceContract.getPriceList().getName(),
+                        priceContract.getPriceList().getPrice(),
+                        priceContract.getCount(),
+                        priceContract.getPriceList().getPrice()*priceContract.getCount()
+                ));
+            });
+            var contractDTO = new ContractResponseDTO(
+                    contract.getId(),
+                    contract.getNumber(),
+                    contract.getDate(),
+                    new ClientShortResponseDTO(
+                            contract.getClient().getId(),
+                            contract.getClient().getFaceType(),
+                            contract.getClient().getFullName(),
+                            contract.getClient().getCEOFullName(),
+                            contract.getClient().getINN(),
+                            contract.getClient().getPhone(),
+                            contract.getClient().getEmail()
+                    ),
+                    contract.isVolume(),
+                    contract.getPrice(),
+                    contract.getStartDate(),
+                    contract.getEndDoingDate(),
+                    contract.getEndLifeDate(),
+                    contract.getSubject(),
+                    new UserDTO(
+                            contract.getEmployee().getId(),
+                            contract.getEmployee().getFullName(),
+                            contract.getEmployee().getEmail(),
+                            contract.getEmployee().getStatus().getStatus(),
+                            contract.getEmployee().isAdmin(),
+                            contract.getEmployee().isVerification()
+                    ),
+                    contract.isEnd(),
+                    priceListResponseDTOS
+            );
+            contractsDTOS.add(contractDTO);
+        });
+
+        return ResponseEntity.ok(contractsDTOS);
+    }
+
+    @Transactional
+    public ResponseEntity<?> concreteContract(UUID id){
+        var contractOptional = contractRepository.findById(id);
+        if(contractOptional.isEmpty()){
+            throw new NotFoundException("Контракт не найден");
+        }
+        List<PriceListResponseDTO> priceListResponseDTOS = new ArrayList<>();
+        var listPrices = priceContractRepository.findAllByContract(contractOptional.get());
+        listPrices.forEach(priceContract -> {
+            priceListResponseDTOS.add(new PriceListResponseDTO(
+                    priceContract.getId(),
+                    priceContract.getPriceList().getName(),
+                    priceContract.getPriceList().getPrice(),
+                    priceContract.getCount(),
+                    priceContract.getPriceList().getPrice()*priceContract.getCount()
+            ));
+        });
+        var contract = contractOptional.get();
+        var contractDTO = new ContractResponseDTO(
+                contract.getId(),
+                contract.getNumber(),
+                contract.getDate(),
+                new ClientShortResponseDTO(
+                        contract.getClient().getId(),
+                        contract.getClient().getFaceType(),
+                        contract.getClient().getFullName(),
+                        contract.getClient().getCEOFullName(),
+                        contract.getClient().getINN(),
+                        contract.getClient().getPhone(),
+                        contract.getClient().getEmail()
+                ),
+                contract.isVolume(),
+                contract.getPrice(),
+                contract.getStartDate(),
+                contract.getEndDoingDate(),
+                contract.getEndLifeDate(),
+                contract.getSubject(),
+                new UserDTO(
+                        contract.getEmployee().getId(),
+                        contract.getEmployee().getFullName(),
+                        contract.getEmployee().getEmail(),
+                        contract.getEmployee().getStatus().getStatus(),
+                        contract.getEmployee().isAdmin(),
+                        contract.getEmployee().isVerification()
+                ),
+                contract.isEnd(),
+                priceListResponseDTOS
+        );
+        return ResponseEntity.ok(contractDTO);
+    }
+
+    @Transactional
+    public ResponseEntity<?> clientCotracts(UUID id){
+        var client = clientRepository.findById(id);
+        if(client.isEmpty()){
+            throw new NotFoundException("Клиент не найден");
+        }
+        var contracts = contractRepository.findAllByClient(client.get());
+        List<ContractResponseDTO> contractsDTOS = new ArrayList<>();
+        contracts.forEach(contract -> {
+            List<PriceListResponseDTO> priceListResponseDTOS = new ArrayList<>();
+            priceContractRepository.findAllByContract(contract).forEach(priceContract -> {
+                priceListResponseDTOS.add(new PriceListResponseDTO(
+                        priceContract.getId(),
+                        priceContract.getPriceList().getName(),
+                        priceContract.getPriceList().getPrice(),
+                        priceContract.getCount(),
+                        priceContract.getPriceList().getPrice()*priceContract.getCount()
+                ));
+            });
+            var contractDTO = new ContractResponseDTO(
+                    contract.getId(),
+                    contract.getNumber(),
+                    contract.getDate(),
+                    new ClientShortResponseDTO(
+                            contract.getClient().getId(),
+                            contract.getClient().getFaceType(),
+                            contract.getClient().getFullName(),
+                            contract.getClient().getCEOFullName(),
+                            contract.getClient().getINN(),
+                            contract.getClient().getPhone(),
+                            contract.getClient().getEmail()
+                    ),
+                    contract.isVolume(),
+                    contract.getPrice(),
+                    contract.getStartDate(),
+                    contract.getEndDoingDate(),
+                    contract.getEndLifeDate(),
+                    contract.getSubject(),
+                    new UserDTO(
+                            contract.getEmployee().getId(),
+                            contract.getEmployee().getFullName(),
+                            contract.getEmployee().getEmail(),
+                            contract.getEmployee().getStatus().getStatus(),
+                            contract.getEmployee().isAdmin(),
+                            contract.getEmployee().isVerification()
+                    ),
+                    contract.isEnd(),
+                    priceListResponseDTOS
+            );
+            contractsDTOS.add(contractDTO);
+        });
+        return ResponseEntity.ok(contractsDTOS);
     }
 }
