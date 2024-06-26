@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,9 +20,6 @@ public class ClientEntity {
     private UUID id;
     @Column(name="face_type")
     private String faceType;
-    @ManyToOne
-    @JoinColumn(name = "bic", referencedColumnName = "code")
-    private BICEntity bic;
     @Column(name = "unique_tax_number")
     private String INN;
     @Column(name = "cpp")

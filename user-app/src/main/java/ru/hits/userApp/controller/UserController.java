@@ -55,7 +55,7 @@ public class UserController {
         return userService.addWorkStatus(authentication, workStatusCreateDTO);
     }
 
-    @PutMapping("/status/{id}")
+    @PutMapping("/add/status/{id}")
     public ResponseEntity<?> editWorkStatus(@RequestBody WorkStatusCreateDTO workStatusCreateDTO, @PathVariable UUID id, Authentication authentication){
         //Изменение должности
         return userService.editStatus(authentication,workStatusCreateDTO,id);

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class ClientFullResponseDTO {
     private UUID id;
     private String faceType;
-    private BicDTO bicId;
+    private List<ResponseRequisite> requisites;
     private String inn;
     private String cpp;
     private String opf;

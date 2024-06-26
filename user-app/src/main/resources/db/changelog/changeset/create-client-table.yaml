@@ -18,11 +18,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: bic
-                  type: integer
-                  constraints:
-                    nullable: false
-              - column:
                   name: unique_tax_number
                   type: varchar(255)
                   constraints:

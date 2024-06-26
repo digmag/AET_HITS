@@ -136,6 +136,9 @@ public class DocumentService {
         if(employee.isEmpty()){
             throw new NotFoundException("Работник не найден");
         }
+        if(!employee.get().isAdmin()){
+            throw  new ForbiddenException("Работник не является админом");
+        }
         AtomicReference<Double> customPrice = new AtomicReference<>((createDTO.getPrice() != null?createDTO.getPrice():(double)0));
         List<PriceContractEntity> priceContractEntities = new ArrayList<>();
         createDTO.getPricePositions().forEach(pos -> {
@@ -189,7 +192,7 @@ public class DocumentService {
                     priceContract.getPriceList().getPrice(),
                     priceContract.getCount(),
                     0,
-                    priceContract.getPriceList().getPrice()*priceContract.getCount()
+                    createDTO.getVolume()?priceContract.getPriceList().getPrice()*priceContract.getCount():priceContract.getPriceList().getPrice()
             ));
             priceContractRepository.save(priceContract);
         });
@@ -227,35 +230,14 @@ public class DocumentService {
     }
 
     @Transactional
-    public ResponseEntity<?> listOfContracts(/*Фильтры*/Authentication authentication, String startDate, String endDate, UUID id){
+    public ResponseEntity<?> listOfContracts(Authentication authentication, String startDate, String endDate, UUID id){
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
             throw new NotFoundException("Работник не найден");
         }
-        var specPredicates = new ArrayList<Specification<ContractEntity>>();
-        specPredicates.add(((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("employee"), employee.get().getId().toString())));
-        if(!startDate.isEmpty()){
-            LocalDate lstartDate = LocalDate.parse(startDate);
-            if(endDate.isEmpty()){
-                specPredicates.add((root, query, criteriaBuilder) ->
-                        criteriaBuilder.equal(root.get("date"), lstartDate));
-            }
-            else{
-                LocalDate lendDate = LocalDate.parse(endDate);
-                specPredicates.add((root, query, criteriaBuilder) ->
-                        criteriaBuilder.between(root.get("date"), lstartDate, lendDate));
-            }
-
-        }
-        if(!endDate.isEmpty() && startDate.isEmpty()){
-            LocalDate lendDate = LocalDate.parse(endDate);
-            specPredicates.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("date"), lendDate));
-        }
-
-        List<ContractEntity> contracts = contractRepository.findAllByEmployee(employee.get());
+        Specification<ContractEntity> spec = contractSearch(startDate, endDate, employee.get());
+        List<ContractEntity> contracts = contractRepository.findAll(spec);
         List<ContractResponseDTO> contractsDTOS = new ArrayList<>();
         contracts.forEach(contract -> {
             List<PriceListResponseDTO> priceListResponseDTOS = new ArrayList<>();
@@ -303,6 +285,29 @@ public class DocumentService {
         });
 
         return ResponseEntity.ok(contractsDTOS);
+    }
+
+    private Specification<ContractEntity> contractSearch(String start, String end, EmployeeEntity id){
+        var specPredicates = new ArrayList<Specification<ContractEntity>>();
+        if(id.isAdmin()){
+            return Specification.allOf();
+        }
+        specPredicates.add(((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("employee"), id)));
+        if(start.isEmpty() && end.isEmpty()){
+            return Specification.allOf(specPredicates);
+        }
+        if(!start.isEmpty()){
+            LocalDate lstartDate = LocalDate.parse(start);
+            specPredicates.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("date"), lstartDate));
+        }
+        if(!end.isEmpty()){
+            LocalDate lendDate = LocalDate.parse(end);
+            specPredicates.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.lessThanOrEqualTo(root.get("date"), lendDate));
+        }
+        return Specification.allOf(specPredicates);
     }
 
     @Transactional
@@ -426,14 +431,25 @@ public class DocumentService {
         if(Objects.equals(priceContract.get().getCount(), priceContract.get().getDone())){
             throw new BadRequestException("Данная позиция полностью выполнена");
         }
+        if(!contract.get().isVolume()){
+            List<PriceContractEntity> priceContractEntities = priceContractRepository.findAllByContract(contract.get());
+            AtomicReference<Double> sum = new AtomicReference<>((double) 0);
+            priceContractEntities.forEach(priceContract1 -> {
+                sum.updateAndGet(v -> v + priceContract1.getContract().getPrice() * priceContract1.getDone());
+            });
+            if(sum.get() >= contract.get().getPrice()){
+                throw new BadRequestException("Сумма выполненой работы не должна привышать суммы договора");
+            }
+        }
         priceContract.get().setDone(priceContract.get().getDone()+1);
+        priceContractRepository.save(priceContract.get());
         return ResponseEntity.ok(new PriceListResponseDTO(
                 priceContract.get().getPriceList().getId(),
                 priceContract.get().getPriceList().getName(),
                 priceContract.get().getPriceList().getPrice(),
                 priceContract.get().getCount(),
                 priceContract.get().getDone(),
-                priceContract.get().getCount()*priceContract.get().getPriceList().getPrice()
+                contract.get().isVolume()?priceContract.get().getCount()*priceContract.get().getPriceList().getPrice():priceContract.get().getPriceList().getPrice()
         ));
     }
 }

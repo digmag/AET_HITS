@@ -15,8 +15,8 @@ import java.util.UUID;
 public class ClientController {
     private final ClientService clientService;
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody CreateDTO clientCreateDTO){
-        return clientService.create(clientCreateDTO);
+    public ResponseEntity<?> create(@RequestBody CreateDTO clientCreateDTO, Authentication authentication){
+        return clientService.create(clientCreateDTO, authentication);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -29,16 +29,21 @@ public class ClientController {
         return  clientService.getClient(id);
     }
 
-    @PostMapping("/list")
+    @GetMapping("/list")
     public ResponseEntity<?> list(
-            @RequestParam(name = "page", defaultValue = "5") Integer page
+            @RequestParam(name = "page", defaultValue = "5") Integer page,
+            @RequestParam(name = "isLaw", defaultValue = "false") Boolean isLaw,
+            @RequestParam(name = "inn", defaultValue = "") String inn,
+            @RequestParam(name = "name", defaultValue = "") String name,
+            @RequestParam(name = "email", defaultValue = "") String email,
+            @RequestParam(name = "ceoName", defaultValue = "") String ceoName
     ){
-        return clientService.list(page);
+        return clientService.list(page,isLaw,inn,name,email,ceoName);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@RequestBody CreateDTO createDTO, @PathVariable UUID id){
-        return null;
+    public ResponseEntity<?> update(@RequestBody CreateDTO createDTO, @PathVariable UUID id, Authentication authentication){
+        return clientService.update(createDTO, id, authentication);
     }
 
     @GetMapping("/bic")

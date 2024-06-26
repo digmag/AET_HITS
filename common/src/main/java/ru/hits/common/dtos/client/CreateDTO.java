@@ -5,12 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateDTO {
     private boolean clientType;
-    private Integer bicId;
+    private List<RequisiteCreateDTO> bankRequisites;
     private String inn;
     private String cpp;
     private Integer opf;

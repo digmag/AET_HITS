@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -12,13 +13,10 @@ import ru.hits.common.dtos.client.*;
 import ru.hits.common.security.JwtUserData;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
-import ru.hits.doc_core.client.entity.BICEntity;
 import ru.hits.doc_core.client.entity.ClientEntity;
 import ru.hits.doc_core.client.entity.OPFEntity;
-import ru.hits.doc_core.client.repository.BICRepository;
-import ru.hits.doc_core.client.repository.ClientRepository;
-import ru.hits.doc_core.client.repository.EmployeeRepository;
-import ru.hits.doc_core.client.repository.OPFRepository;
+import ru.hits.doc_core.client.entity.Requisites;
+import ru.hits.doc_core.client.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +30,17 @@ public class ClientService {
     private final BICRepository bicRepository;
     private final EmployeeRepository employeeRepository;
     private final OPFRepository opfRepository;
+    private final RequisiteRepository requisiteRepository;
 
     @Transactional
-    public ResponseEntity<?> create(CreateDTO clientCreateDTO){
-        Optional<BICEntity> bic = bicRepository.findById(clientCreateDTO.getBicId());
-        if(bic.isEmpty()){
-            throw new NotFoundException("Не удалось найти код БИК");
+    public ResponseEntity<?> create(CreateDTO clientCreateDTO, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var employee = employeeRepository.findById(user.getId());
+        if(employee.isEmpty()){
+            throw new NotFoundException("Работник не найден");
+        }
+        if(!employee.get().isAdmin()){
+            throw new ForbiddenException("Работник не является админом");
         }
         Optional<OPFEntity> opf = opfRepository.findById(clientCreateDTO.getOpf());
         if(opf.isEmpty() && (clientCreateDTO.getOpf() != null)){
@@ -46,7 +49,6 @@ public class ClientService {
         ClientEntity client = new ClientEntity(
                 UUID.randomUUID(),
                 clientCreateDTO.isClientType()?"PHYSICAL":"LAW",
-                bic.get(),
                 clientCreateDTO.getInn(),
                 clientCreateDTO.getCpp(),
                 opf.orElse(null),
@@ -60,6 +62,19 @@ public class ClientService {
                 clientCreateDTO.getComment()
         );
         clientRepository.save(client);
+        clientCreateDTO.getBankRequisites().forEach(requisiteDTO -> {
+            var bic = bicRepository.findById(requisiteDTO.getBic());
+            if(bic.isEmpty()){
+                throw new NotFoundException("Не удалось найти бик с кодом "+ requisiteDTO.getRequisite());
+            }
+            var requisite = new Requisites(
+                    UUID.randomUUID(),
+                    client,
+                    bic.get(),
+                    requisiteDTO.getRequisite()
+            );
+            requisiteRepository.save(requisite);
+        });
         return ResponseEntity.ok(new ClientShortResponseDTO(
                 client.getId(),
                 client.getFaceType(),
@@ -72,21 +87,24 @@ public class ClientService {
     }
 
     @Transactional
-    public ResponseEntity<?> update (CreateDTO createDTO, UUID id) {
+    public ResponseEntity<?> update (CreateDTO createDTO, UUID id, Authentication authentication) {
+        var user = (JwtUserData) authentication.getPrincipal();
+        var employee = employeeRepository.findById(user.getId());
+        if(employee.isEmpty()){
+            throw new NotFoundException("Не удалось найти работника");
+        }
+        if(!employee.get().isAdmin()){
+            throw new ForbiddenException("Работник не является администратором");
+        }
         Optional<ClientEntity> client = clientRepository.findById(id);
         if(client.isEmpty()){
             throw new NotFoundException("Клиент не найден");
-        }
-        Optional<BICEntity> bic = bicRepository.findById(createDTO.getBicId());
-        if(bic.isEmpty()){
-            throw new NotFoundException("Не удалось найти код БИК");
         }
         Optional<OPFEntity> opf = opfRepository.findById(createDTO.getOpf());
         if(opf.isEmpty() && (createDTO.getOpf() != null)){
             throw new NotFoundException("Организационно правовая форма не найдена в справочнике");
         }
         client.get().setFaceType(createDTO.isClientType()?"PHYSICAL":"LAW");
-        client.get().setBic(bic.get());
         client.get().setINN(createDTO.getInn());
         client.get().setCPP(createDTO.getCpp());
         client.get().setOpf(opf.orElse(null));
@@ -99,11 +117,26 @@ public class ClientService {
         client.get().setEmail(createDTO.getEmail());
         client.get().setComment(createDTO.getComment());
         clientRepository.save(client.get());
+        List<ResponseRequisite> requisiteCreateDTOS = new ArrayList<>();
+        createDTO.getBankRequisites().forEach(requisiteDTO -> {
+            var bic = bicRepository.findById(requisiteDTO.getBic());
+            if(bic.isEmpty()){
+                throw new NotFoundException("Не удалось найти бик с кодом "+ requisiteDTO.getRequisite());
+            }
+            var requisite = requisiteRepository.findByClient(client.get());
+            if(requisite.isEmpty()){
+                throw new NotFoundException("Счет не найден");
+            }
+            requisite.get().setBic(bic.get());
+            requisite.get().setBill(requisiteDTO.getRequisite());
+            requisiteRepository.save(requisite.get());
+            requisiteCreateDTOS.add(new ResponseRequisite(requisite.get().getBic().getBankName(), requisite.get().getBill()));
+        });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(
                         client.get().getId(),
                         client.get().getFaceType(),
-                        new BicDTO(client.get().getBic().getCode(), client.get().getBic().getBankName(),client.get().getBic().getAddress(), client.get().getBic().getBill()),
+                        requisiteCreateDTOS,
                         client.get().getINN(),
                         client.get().getCPP(),
                         client.get().getOpf().getName(),
@@ -134,9 +167,10 @@ public class ClientService {
         return ResponseEntity.ok("Удален");
     }
 
-    public ResponseEntity<?> list (Integer page){
+    public ResponseEntity<?> list (Integer page, Boolean isLaw, String inn, String name, String email, String ceoName){
         page = page==null? 0: page;
-        Page<ClientEntity> clientEntityPage = clientRepository.findAll(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName")));
+        var pageRequest = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName"));
+        Page<ClientEntity> clientEntityPage = clientRepository.findAll(clientListSpecification(isLaw, inn, name,email,ceoName), pageRequest);
         if(page>clientEntityPage.getTotalPages()){
             throw new NotFoundException("Страница не найдена");
         }
@@ -156,17 +190,48 @@ public class ClientService {
         return ResponseEntity.ok(pageDTO);
     }
 
+    private Specification<ClientEntity> clientListSpecification(Boolean isLaw, String inn, String name, String email, String ceoName){
+        var spec = new ArrayList<Specification<ClientEntity>>();
+        if(isLaw == null && inn.isEmpty() && name.isEmpty() && email.isEmpty() && ceoName.isEmpty())
+            return Specification.allOf();
+        if(isLaw != null){
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("face_type"), isLaw?"LAW":"PHYSICAL"));
+        }
+        if(!inn.isEmpty()){
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("unique_tax_number"), inn));
+        }
+        if(!name.isEmpty()){
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("short_name"), name));
+        }
+        if(!email.isEmpty()){
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get(email),email));
+        }
+        if(!ceoName.isEmpty()){
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("ceo_full_name"),ceoName));
+        }
+        return Specification.allOf(spec);
+    }
+
     @Transactional
     public ResponseEntity<?> getClient(UUID id){
         Optional<ClientEntity> client = clientRepository.findById(id);
         if(client.isEmpty()){
             throw new NotFoundException("Клиент не найден");
         }
+        List<ResponseRequisite> requisiteCreateDTOS = new ArrayList<>();
+        requisiteRepository.findAllByClient(client.get()).forEach(requisites -> {
+            requisiteCreateDTOS.add(new ResponseRequisite(requisites.getBic().getBankName(), requisites.getBill()));
+        });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(
                         client.get().getId(),
                         client.get().getFaceType(),
-                        new BicDTO(client.get().getBic().getCode(), client.get().getBic().getBankName(),client.get().getBic().getAddress(), client.get().getBic().getBill()),
+                        requisiteCreateDTOS,
                         client.get().getINN(),
                         client.get().getCPP(),
                         client.get().getOpf().getName(),
