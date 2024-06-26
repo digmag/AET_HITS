@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.client.CreateDTO;
 import ru.hits.common.dtos.client.UpdateDTO;
+import ru.hits.doc_core.client.entity.OPFEntity;
 import ru.hits.doc_core.client.service.ClientService;
 
 import java.util.UUID;
@@ -55,5 +56,10 @@ public class ClientController {
     @GetMapping("/opf")
     public ResponseEntity<?> opfList(@RequestParam(name = "name", defaultValue = "") String name){
         return clientService.getOpf(name);
+    }
+
+    @PostMapping("/opf")
+    public ResponseEntity<?> addOpf(@RequestBody OPFEntity opf, Authentication authentication){
+        return clientService.addOPF(opf, authentication);
     }
 }

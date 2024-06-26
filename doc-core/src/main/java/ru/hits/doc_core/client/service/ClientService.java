@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.common.dtos.client.*;
 import ru.hits.common.security.JwtUserData;
+import ru.hits.common.security.exception.BadRequestException;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
 import ru.hits.doc_core.client.entity.ClientEntity;
@@ -261,5 +262,21 @@ public class ClientService {
             return ResponseEntity.ok(opfRepository.findAll());
         }
         return ResponseEntity.ok(opfRepository.findAllByName(name));
+    }
+
+    public ResponseEntity<?> addOPF(OPFEntity opf, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var employee = employeeRepository.findById(user.getId());
+        if(employee.isEmpty()){
+            throw new NotFoundException("Пользователь не найден");
+        }
+        if(!employee.get().isAdmin()){
+            throw new ForbiddenException("Пользователь не является администратором");
+        }
+        if(opf.getId() == null|| opf.getId().toString().isEmpty() ||opf.getName()==null || opf.getName().isEmpty()){
+            throw new BadRequestException("Все поля обязательны к заполнению");
+        }
+        opfRepository.save(opf);
+        return ResponseEntity.ok(opf);
     }
 }
