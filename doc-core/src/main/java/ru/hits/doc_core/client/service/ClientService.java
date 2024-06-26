@@ -87,7 +87,7 @@ public class ClientService {
     }
 
     @Transactional
-    public ResponseEntity<?> update (CreateDTO createDTO, UUID id, Authentication authentication) {
+    public ResponseEntity<?> update (UpdateDTO createDTO, UUID id, Authentication authentication) {
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
@@ -119,18 +119,18 @@ public class ClientService {
         clientRepository.save(client.get());
         List<ResponseRequisite> requisiteCreateDTOS = new ArrayList<>();
         createDTO.getBankRequisites().forEach(requisiteDTO -> {
+            var req = requisiteRepository.findById(requisiteDTO.getId());
+            if(req.isEmpty()){
+                throw new NotFoundException("Не удалось найти счет с кодом "+ requisiteDTO.getId());
+            }
             var bic = bicRepository.findById(requisiteDTO.getBic());
             if(bic.isEmpty()){
-                throw new NotFoundException("Не удалось найти бик с кодом "+ requisiteDTO.getRequisite());
+                throw new NotFoundException("Не удалось найти бик с кодом "+ requisiteDTO.getBic());
             }
-            var requisite = requisiteRepository.findByClient(client.get());
-            if(requisite.isEmpty()){
-                throw new NotFoundException("Счет не найден");
-            }
-            requisite.get().setBic(bic.get());
-            requisite.get().setBill(requisiteDTO.getRequisite());
-            requisiteRepository.save(requisite.get());
-            requisiteCreateDTOS.add(new ResponseRequisite(requisite.get().getBic().getBankName(), requisite.get().getBill()));
+            req.get().setBill(requisiteDTO.getRequisite());
+            req.get().setBic(bic.get());
+            requisiteRepository.save(req.get());
+            requisiteCreateDTOS.add(new ResponseRequisite(req.get().getId(),req.get().getBic().getBankName(), req.get().getBill()));
         });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(
@@ -163,6 +163,9 @@ public class ClientService {
         if(!clientRepository.existsById(id)){
             throw new NotFoundException("Клиент не найден");
         }
+        requisiteRepository.findAllByClient(clientRepository.findById(id).get()).forEach(requisites -> {
+            requisiteRepository.delete(requisites);
+        });
         clientRepository.deleteById(id);
         return ResponseEntity.ok("Удален");
     }
@@ -225,7 +228,7 @@ public class ClientService {
         }
         List<ResponseRequisite> requisiteCreateDTOS = new ArrayList<>();
         requisiteRepository.findAllByClient(client.get()).forEach(requisites -> {
-            requisiteCreateDTOS.add(new ResponseRequisite(requisites.getBic().getBankName(), requisites.getBill()));
+            requisiteCreateDTOS.add(new ResponseRequisite(requisites.getId(),requisites.getBic().getBankName(), requisites.getBill()));
         });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(

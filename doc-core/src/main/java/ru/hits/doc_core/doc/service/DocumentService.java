@@ -187,7 +187,7 @@ public class DocumentService {
         priceContractEntities.forEach(priceContract -> {
             priceContract.setContract(contract);
             priceListResponseDTOS.add(new PriceListResponseDTO(
-                    priceContract.getPriceList().getId(),
+                    priceContract.getId(),
                     priceContract.getPriceList().getName(),
                     priceContract.getPriceList().getPrice(),
                     priceContract.getCount(),
@@ -248,7 +248,7 @@ public class DocumentService {
                         priceContract.getPriceList().getPrice(),
                         priceContract.getCount(),
                         priceContract.getDone(),
-                        priceContract.getPriceList().getPrice()*priceContract.getCount()
+                        priceContract.getCount()!=null?priceContract.getPriceList().getPrice()*priceContract.getCount():priceContract.getPriceList().getPrice()
                 ));
             });
             var contractDTO = new ContractResponseDTO(
@@ -325,7 +325,7 @@ public class DocumentService {
                     priceContract.getPriceList().getPrice(),
                     priceContract.getCount(),
                     priceContract.getDone(),
-                    priceContract.getPriceList().getPrice()*priceContract.getCount()
+                    priceContract.getCount()!=null?priceContract.getPriceList().getPrice()*priceContract.getCount():priceContract.getPriceList().getPrice()
             ));
         });
         var contract = contractOptional.get();
@@ -379,7 +379,7 @@ public class DocumentService {
                         priceContract.getPriceList().getPrice(),
                         priceContract.getCount(),
                         priceContract.getDone(),
-                        priceContract.getPriceList().getPrice()*priceContract.getCount()
+                        priceContract.getCount()!=null?priceContract.getPriceList().getPrice()*priceContract.getCount():priceContract.getPriceList().getPrice()
                 ));
             });
             var contractDTO = new ContractResponseDTO(
@@ -418,26 +418,22 @@ public class DocumentService {
     }
 
     @Transactional
-    public ResponseEntity<?> makeDone(UUID cid, UUID pid){
-        var contract = contractRepository.findById(cid);
-        var pricelist = priceListRepository.findById(pid);
-        if(contract.isEmpty() || pricelist.isEmpty()){
-            throw new NotFoundException("Позиция или контракт не найдена");
-        }
-        var priceContract = priceContractRepository.findByContractAndPriceList(contract.get(), pricelist.get());
+    public ResponseEntity<?> makeDone(UUID id){
+        var priceContract = priceContractRepository.findById(id);
         if(priceContract.isEmpty()){
-            throw new NotFoundException("Позиция договора не найдена");
+            throw new NotFoundException("Позиция не найдена");
         }
         if(Objects.equals(priceContract.get().getCount(), priceContract.get().getDone())){
             throw new BadRequestException("Данная позиция полностью выполнена");
         }
-        if(!contract.get().isVolume()){
-            List<PriceContractEntity> priceContractEntities = priceContractRepository.findAllByContract(contract.get());
+        var contract = priceContract.get().getContract();
+        if(!contract.isVolume()){
+            List<PriceContractEntity> priceContractEntities = priceContractRepository.findAllByContract(contract);
             AtomicReference<Double> sum = new AtomicReference<>((double) 0);
             priceContractEntities.forEach(priceContract1 -> {
-                sum.updateAndGet(v -> v + priceContract1.getContract().getPrice() * priceContract1.getDone());
+                sum.updateAndGet(v -> v + priceContract1.getPriceList().getPrice() * priceContract1.getDone());
             });
-            if(sum.get() >= contract.get().getPrice()){
+            if(sum.get() >= contract.getPrice()){
                 throw new BadRequestException("Сумма выполненой работы не должна привышать суммы договора");
             }
         }
@@ -449,7 +445,7 @@ public class DocumentService {
                 priceContract.get().getPriceList().getPrice(),
                 priceContract.get().getCount(),
                 priceContract.get().getDone(),
-                contract.get().isVolume()?priceContract.get().getCount()*priceContract.get().getPriceList().getPrice():priceContract.get().getPriceList().getPrice()
+                contract.isVolume()?priceContract.get().getCount()*priceContract.get().getPriceList().getPrice():priceContract.get().getPriceList().getPrice()
         ));
     }
 }

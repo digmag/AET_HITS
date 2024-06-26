@@ -9,8 +9,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseRequisite {
+public class RequisiteUpdateDTO {
     private UUID id;
-    private String bic;
+    private Integer bic;
     private String requisite;
 }

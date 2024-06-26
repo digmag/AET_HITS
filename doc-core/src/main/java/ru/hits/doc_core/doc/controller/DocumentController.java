@@ -78,8 +78,8 @@ public class DocumentController {
         return null;
     }
 
-    @PutMapping("/contract/{cid}/done/{pid}")
-    public ResponseEntity<?> makeDone(@PathVariable UUID cid, @PathVariable UUID pid){
-        return documentService.makeDone(cid, pid);
+    @PutMapping("/contract/done/{id}")
+    public ResponseEntity<?> makeDone(@PathVariable UUID id){
+        return documentService.makeDone(id);
     }
 }

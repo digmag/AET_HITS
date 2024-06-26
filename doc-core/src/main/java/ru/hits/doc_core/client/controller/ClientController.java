@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.client.CreateDTO;
+import ru.hits.common.dtos.client.UpdateDTO;
 import ru.hits.doc_core.client.service.ClientService;
 
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class ClientController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@RequestBody CreateDTO createDTO, @PathVariable UUID id, Authentication authentication){
+    public ResponseEntity<?> update(@RequestBody UpdateDTO createDTO, @PathVariable UUID id, Authentication authentication){
         return clientService.update(createDTO, id, authentication);
     }
 
