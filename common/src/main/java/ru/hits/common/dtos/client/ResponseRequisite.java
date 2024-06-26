@@ -12,5 +12,6 @@ import java.util.UUID;
 public class ResponseRequisite {
     private UUID id;
     private String bic;
+    private Integer code;
     private String requisite;
 }

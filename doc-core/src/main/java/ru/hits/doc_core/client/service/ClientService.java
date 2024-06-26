@@ -106,7 +106,7 @@ public class ClientService {
         if(opf.isEmpty() && (createDTO.getOpf() != null)){
             throw new NotFoundException("Организационно правовая форма не найдена в справочнике");
         }
-        client.get().setFaceType(createDTO.isClientType()?"PHYSICAL":"LAW");
+        client.get().setFaceType(createDTO.isClientType()?"LAW":"PHYSICAL");
         client.get().setINN(createDTO.getInn());
         client.get().setCPP(createDTO.getCpp());
         client.get().setOpf(opf.orElse(null));
@@ -132,7 +132,7 @@ public class ClientService {
             req.get().setBill(requisiteDTO.getRequisite());
             req.get().setBic(bic.get());
             requisiteRepository.save(req.get());
-            requisiteCreateDTOS.add(new ResponseRequisite(req.get().getId(),req.get().getBic().getBankName(), req.get().getBill()));
+            requisiteCreateDTOS.add(new ResponseRequisite(req.get().getId(),req.get().getBic().getBankName(), req.get().getBic().getCode(), req.get().getBill()));
         });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(
@@ -230,7 +230,7 @@ public class ClientService {
         }
         List<ResponseRequisite> requisiteCreateDTOS = new ArrayList<>();
         requisiteRepository.findAllByClient(client.get()).forEach(requisites -> {
-            requisiteCreateDTOS.add(new ResponseRequisite(requisites.getId(),requisites.getBic().getBankName(), requisites.getBill()));
+            requisiteCreateDTOS.add(new ResponseRequisite(requisites.getId(),requisites.getBic().getBankName(),requisites.getBic().getCode(), requisites.getBill()));
         });
         return ResponseEntity.ok(
                 new ClientFullResponseDTO(
@@ -290,6 +290,7 @@ public class ClientService {
             list.add(new ResponseRequisite(
                     requisites.getId(),
                     requisites.getBic().getBankName(),
+                    requisites.getBic().getCode(),
                     requisites.getBill()
             ));
         });

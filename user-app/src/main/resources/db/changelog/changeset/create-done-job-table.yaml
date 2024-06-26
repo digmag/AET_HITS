@@ -22,6 +22,11 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     nullable: false
+              - column:
+                  name: date
+                  type: date
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             baseTableName: done_job
             baseColumnNames: [ service ]

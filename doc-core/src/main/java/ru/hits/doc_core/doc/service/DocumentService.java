@@ -626,7 +626,7 @@ public class DocumentService {
         ));
     }
 
-    public ResponseEntity<?> report(Authentication authentication){
+    public ResponseEntity<?> report(Authentication authentication, String start, String end){
         var user = (JwtUserData) authentication.getPrincipal();
         var admin = employeeRepository.findById(user.getId());
         if(admin.isEmpty()){
@@ -634,7 +634,7 @@ public class DocumentService {
         }
         Map<EmployeeEntity, List<DoneJob>> employeeEntitiesDoneJobMap = new HashMap<>();
         employeeRepository.findAll().forEach(employee -> {
-            employeeEntitiesDoneJobMap.put(employee, doneJobRepository.findAllByEmployee(employee));
+            employeeEntitiesDoneJobMap.put(employee, doneJobRepository.findAll(doneJobSpecification(start, end, employee)));
         });
         AtomicReference<Double> allSum = new AtomicReference<>((double) 0);
         List<EmployeeReportDTO> employeeReportDTOS = new ArrayList<>();
@@ -664,5 +664,25 @@ public class DocumentService {
         );
 
         return ResponseEntity.ok(reportDTO);
+    }
+
+    private Specification<DoneJob> doneJobSpecification(String start, String end, EmployeeEntity employee){
+        var spec = new ArrayList<Specification<DoneJob>>();
+        spec.add((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("employee"), employee));
+        if(start.isEmpty() && end.isEmpty() && employee == null){
+            return Specification.allOf();
+        }
+        if(!start.isEmpty()){
+            LocalDate startd = LocalDate.parse(start);
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("date"), startd));
+        }
+        if(!end.isEmpty()){
+            LocalDate endd = LocalDate.parse(end);
+            spec.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.lessThanOrEqualTo(root.get("date"), endd));
+        }
+        return Specification.allOf(spec);
     }
 }

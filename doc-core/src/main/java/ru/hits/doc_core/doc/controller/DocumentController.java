@@ -84,7 +84,9 @@ public class DocumentController {
     }
 
     @GetMapping("/report")
-    public ResponseEntity<?> report(Authentication authentication){
-        return documentService.report(authentication);
+    public ResponseEntity<?> report(Authentication authentication,
+                                    @RequestParam(name="start", defaultValue = "")String start,
+                                    @RequestParam(name="end", defaultValue = "") String end){
+        return documentService.report(authentication, start, end);
     }
 }

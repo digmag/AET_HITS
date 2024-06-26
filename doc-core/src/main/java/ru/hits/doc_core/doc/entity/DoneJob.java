@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.hits.doc_core.client.entity.EmployeeEntity;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -24,4 +25,6 @@ public class DoneJob {
     @ManyToOne
     @JoinColumn(name = "employee", referencedColumnName = "id")
     private EmployeeEntity employee;
+
+    private LocalDate date;
 }
