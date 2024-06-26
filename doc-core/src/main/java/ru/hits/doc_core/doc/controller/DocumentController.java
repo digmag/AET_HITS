@@ -82,4 +82,9 @@ public class DocumentController {
     public ResponseEntity<?> makeDone(@PathVariable UUID id, Authentication authentication){
         return documentService.makeDone(id, authentication);
     }
+
+    @GetMapping("/report")
+    public ResponseEntity<?> report(Authentication authentication){
+        return documentService.report(authentication);
+    }
 }

@@ -11,6 +11,10 @@ import ru.hits.common.dtos.contract.ContractCreateDTO;
 import ru.hits.common.dtos.contract.ContractResponseDTO;
 import ru.hits.common.dtos.doc.PriceListCreateDTO;
 import ru.hits.common.dtos.doc.PriceListResponseDTO;
+import ru.hits.common.dtos.report.ContractReportDTO;
+import ru.hits.common.dtos.report.EmployeeReportDTO;
+import ru.hits.common.dtos.report.PriceListReportDTO;
+import ru.hits.common.dtos.report.ReportDTO;
 import ru.hits.common.dtos.user.UserDTO;
 import ru.hits.common.security.JwtUserData;
 import ru.hits.common.security.exception.BadRequestException;
@@ -20,10 +24,7 @@ import ru.hits.common.security.exception.UnauthorizedException;
 import ru.hits.doc_core.client.entity.EmployeeEntity;
 import ru.hits.doc_core.client.repository.ClientRepository;
 import ru.hits.doc_core.client.repository.EmployeeRepository;
-import ru.hits.doc_core.doc.entity.ContractEntity;
-import ru.hits.doc_core.doc.entity.DoneJob;
-import ru.hits.doc_core.doc.entity.PriceContractEntity;
-import ru.hits.doc_core.doc.entity.PriceListEntity;
+import ru.hits.doc_core.doc.entity.*;
 import ru.hits.doc_core.doc.repository.ContractRepository;
 import ru.hits.doc_core.doc.repository.DoneJobRepository;
 import ru.hits.doc_core.doc.repository.PriceListRepository;
@@ -439,6 +440,7 @@ public class DocumentService {
         if(employee.isEmpty()){
             throw new UnauthorizedException("Работник не найден");
         }
+
         var priceContract = priceContractRepository.findById(id);
         if(priceContract.isEmpty()){
             throw new NotFoundException("Позиция не найдена");
@@ -613,5 +615,45 @@ public class DocumentService {
                 contract1.isEnd(),
                 priceListResponseDTOS
         ));
+    }
+
+    public ResponseEntity<?> report(Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var admin = employeeRepository.findById(user.getId());
+        if(admin.isEmpty()){
+            throw new UnauthorizedException("Пользователь не найден");
+        }
+        Map<EmployeeEntity, List<DoneJob>> employeeEntitiesDoneJobMap = new HashMap<>();
+        employeeRepository.findAll().forEach(employee -> {
+            employeeEntitiesDoneJobMap.put(employee, doneJobRepository.findAllByEmployee(employee));
+        });
+        AtomicReference<Double> allSum = new AtomicReference<>((double) 0);
+        List<EmployeeReportDTO> employeeReportDTOS = new ArrayList<>();
+        employeeEntitiesDoneJobMap.forEach((employee, doneJobs) -> {
+            EmployeeReportDTO employeeReportDTO = new EmployeeReportDTO();
+            employeeReportDTO.setFullName(employee.getFullName());
+            List<ContractReportDTO> contractReportDTOS = new ArrayList<>();
+            employeeReportDTO.setSum((double)0);
+            doneJobs.forEach(doneJob -> {
+                contractReportDTOS.add(new ContractReportDTO(
+                        doneJob.getService().getContract().getNumber(),
+                        new PriceListReportDTO(
+                                doneJob.getService().getPriceList().getName(),
+                                doneJob.getService().getDone(),
+                                doneJob.getService().getDone()*doneJob.getService().getPriceList().getPrice()
+                        )
+                ));
+                employeeReportDTO.setSum(employeeReportDTO.getSum()+doneJob.getService().getDone() * doneJob.getService().getPriceList().getPrice());
+                allSum.updateAndGet(v -> v + employeeReportDTO.getSum() + doneJob.getService().getDone() * doneJob.getService().getPriceList().getPrice());
+            });
+            employeeReportDTO.setContractReport(contractReportDTOS);
+            employeeReportDTOS.add(employeeReportDTO);
+        });
+        ReportDTO reportDTO = new ReportDTO(
+                employeeReportDTOS,
+                allSum.get()
+        );
+
+        return ResponseEntity.ok(reportDTO);
     }
 }
