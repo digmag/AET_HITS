@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.contract.ContractCreateDTO;
 import ru.hits.common.dtos.doc.PriceListCreateDTO;
+import ru.hits.doc_core.doc.service.DocumentService;
 
 import java.util.UUID;
 
