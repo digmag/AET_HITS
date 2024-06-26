@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-pricelist
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: contract
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: number
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: volume
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: real
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_doing_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_life_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: employee
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_end
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: contract
+            baseColumnNames: [ client ]
+            referencedTableName: client
+            referencedColumnNames: [ id ]
+            constraintName: FK_contract_client
+        - addForeignKeyConstraint:
+            baseTableName: contract
+            baseColumnNames: [ employee ]
+            referencedTableName: employee
+            referencedColumnNames: [ id ]
+            constraintName: FK_contract_employee

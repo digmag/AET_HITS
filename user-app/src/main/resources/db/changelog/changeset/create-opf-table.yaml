@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-opf
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: opf
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false

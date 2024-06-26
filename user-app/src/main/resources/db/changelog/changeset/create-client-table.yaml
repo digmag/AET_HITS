@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-client
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: client
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: face_type
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unique_tax_number
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cpp
+                  type: varchar(255)
+              - column:
+                  name: opf
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_name
+                  type: varchar(255)
+              - column:
+                  name: ceo_full_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ceo_status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: text
+        - addForeignKeyConstraint:
+            baseTableName: client
+            baseColumnNames: [ opf ]
+            referencedTableName: opf
+            referencedColumnNames: [ id ]
+            constraintName: FK_client_opf
