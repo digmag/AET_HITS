@@ -29,9 +29,9 @@ databaseChangeLog:
                     nullable: false
         - addForeignKeyConstraint:
             baseTableName: requisite
-            baseColumnNames: [ id ]
+            baseColumnNames: [ client ]
             referencedTableName: client
-            referencedColumnNames: [ client ]
+            referencedColumnNames: [ id ]
             constraintName: FK_client_requisite
         - addForeignKeyConstraint:
             baseTableName: requisite
