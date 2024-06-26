@@ -1,0 +1,19 @@
+server:
+  port: 8083
+spring:
+  liquibase:
+    enabled: false
+  application:
+    name: core-app
+  datasource:
+    url: jdbc:postgresql://84.201.140.78:15432/AET_HITS
+    username: admin
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    bootstrap-servers: kafka:9092
+
+spring.config.import: classpath:/security-config.yml

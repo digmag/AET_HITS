@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-requisite
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: requisite
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bic
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bill
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: requisite
+            baseColumnNames: [ client ]
+            referencedTableName: client
+            referencedColumnNames: [ id ]
+            constraintName: FK_client_requisite
+        - addForeignKeyConstraint:
+            baseTableName: requisite
+            baseColumnNames: [ bic ]
+            referencedTableName: bic
+            referencedColumnNames: [ code ]
+            constraintName: FK_bic_requisite

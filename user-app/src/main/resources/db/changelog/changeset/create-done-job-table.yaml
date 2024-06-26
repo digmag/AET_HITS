@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-done-job
+      author: Dmitry Slabukhin
+      changes:
+        - createTable:
+            tableName: done_job
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: service
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: employee
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: done_job
+            baseColumnNames: [ service ]
+            referencedTableName: price_contract
+            referencedColumnNames: [ id ]
+            constraintName: FK_service_done
+        - addForeignKeyConstraint:
+            baseTableName: done_job
+            baseColumnNames: [ employee ]
+            referencedTableName: employee
+            referencedColumnNames: [ id ]
+            constraintName: FK_employee_done

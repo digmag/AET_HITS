@@ -1,0 +1,12 @@
+package ru.hits.common.dtos.user;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RecoverPasswordDTO {
+    private String password;
+}
