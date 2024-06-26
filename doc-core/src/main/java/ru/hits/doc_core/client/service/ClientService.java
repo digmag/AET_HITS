@@ -167,7 +167,7 @@ public class ClientService {
         return ResponseEntity.ok("Удален");
     }
 
-    public ResponseEntity<?> list (Integer page, Boolean isLaw, String inn, String name, String email, String ceoName){
+    public ResponseEntity<?> list (Integer page, String isLaw, String inn, String name, String email, String ceoName){
         page = page==null? 0: page;
         var pageRequest = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "shortName"));
         Page<ClientEntity> clientEntityPage = clientRepository.findAll(clientListSpecification(isLaw, inn, name,email,ceoName), pageRequest);
@@ -190,29 +190,29 @@ public class ClientService {
         return ResponseEntity.ok(pageDTO);
     }
 
-    private Specification<ClientEntity> clientListSpecification(Boolean isLaw, String inn, String name, String email, String ceoName){
+    private Specification<ClientEntity> clientListSpecification(String isLaw, String inn, String name, String email, String ceoName){
         var spec = new ArrayList<Specification<ClientEntity>>();
-        if(isLaw == null && inn.isEmpty() && name.isEmpty() && email.isEmpty() && ceoName.isEmpty())
+        if(isLaw.isEmpty() && inn.isEmpty() && name.isEmpty() && email.isEmpty() && ceoName.isEmpty())
             return Specification.allOf();
-        if(isLaw != null){
+        if(!isLaw.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("face_type"), isLaw?"LAW":"PHYSICAL"));
+                    criteriaBuilder.equal(root.get("faceType"), isLaw));
         }
         if(!inn.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get("unique_tax_number"), inn));
+                    criteriaBuilder.like(root.get("INN"), inn));
         }
         if(!name.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get("short_name"), name));
+                    criteriaBuilder.like(root.get("shortName"), name));
         }
         if(!email.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get(email),email));
+                    criteriaBuilder.like(root.get("email"),email));
         }
         if(!ceoName.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get("ceo_full_name"),ceoName));
+                    criteriaBuilder.like(root.get("CEOFullName"),ceoName));
         }
         return Specification.allOf(spec);
     }

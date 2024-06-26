@@ -31,8 +31,8 @@ public class ClientController {
 
     @GetMapping("/list")
     public ResponseEntity<?> list(
-            @RequestParam(name = "page", defaultValue = "5") Integer page,
-            @RequestParam(name = "isLaw", defaultValue = "false") Boolean isLaw,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "isLaw", defaultValue = "") String isLaw,
             @RequestParam(name = "inn", defaultValue = "") String inn,
             @RequestParam(name = "name", defaultValue = "") String name,
             @RequestParam(name = "email", defaultValue = "") String email,
