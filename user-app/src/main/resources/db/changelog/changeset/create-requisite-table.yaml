@@ -31,7 +31,7 @@ databaseChangeLog:
             baseTableName: requisite
             baseColumnNames: [ id ]
             referencedTableName: client
-            referencedColumnNames: [ id ]
+            referencedColumnNames: [ client ]
             constraintName: FK_client_requisite
         - addForeignKeyConstraint:
             baseTableName: requisite
