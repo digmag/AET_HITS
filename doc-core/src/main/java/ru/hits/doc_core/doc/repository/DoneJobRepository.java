@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import ru.hits.doc_core.client.entity.EmployeeEntity;
 import ru.hits.doc_core.doc.entity.DoneJob;
+import ru.hits.doc_core.doc.entity.PriceContractEntity;
 
 import java.util.UUID;
 import java.util.List;
@@ -12,4 +13,5 @@ import java.util.List;
 @Repository
 public interface DoneJobRepository extends JpaRepository<DoneJob, UUID>, JpaSpecificationExecutor<DoneJob> {
     List<DoneJob> findAllByEmployee(EmployeeEntity employee);
+    List<DoneJob> findAllByService(PriceContractEntity priceContract);
 }

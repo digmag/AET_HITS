@@ -497,6 +497,9 @@ public class DocumentService {
             throw new NotFoundException("Контракт не найден");
         }
         priceContractRepository.findAllByContract(contract.get()).forEach(priceContract -> {
+            doneJobRepository.findAllByService(priceContract).forEach(doneJob -> {
+                doneJobRepository.delete(doneJob);
+            });
             priceContractRepository.delete(priceContract);
         });
         contractRepository.delete(contract.get());
