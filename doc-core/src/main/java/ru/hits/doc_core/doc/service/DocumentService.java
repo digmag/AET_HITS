@@ -21,6 +21,7 @@ import ru.hits.common.security.exception.BadRequestException;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
 import ru.hits.common.security.exception.UnauthorizedException;
+import ru.hits.doc_core.client.entity.ClientEntity;
 import ru.hits.doc_core.client.entity.EmployeeEntity;
 import ru.hits.doc_core.client.repository.ClientRepository;
 import ru.hits.doc_core.client.repository.EmployeeRepository;
@@ -252,7 +253,7 @@ public class DocumentService {
         if(employee.isEmpty()){
             throw new UnauthorizedException("Работник не найден");
         }
-        Specification<ContractEntity> spec = contractSearch(startDate, endDate, employee.get());
+        Specification<ContractEntity> spec = contractSearch(startDate, endDate, employee.get(), id);
         List<ContractEntity> contracts = contractRepository.findAll(spec);
         List<ContractResponseDTO> contractsDTOS = new ArrayList<>();
         contracts.forEach(contract -> {
@@ -303,7 +304,7 @@ public class DocumentService {
         return ResponseEntity.ok(contractsDTOS);
     }
 
-    private Specification<ContractEntity> contractSearch(String start, String end, EmployeeEntity id){
+    private Specification<ContractEntity> contractSearch(String start, String end, EmployeeEntity id, UUID cid){
         var specPredicates = new ArrayList<Specification<ContractEntity>>();
         if(id.isAdmin()){
             return Specification.allOf();
@@ -322,6 +323,11 @@ public class DocumentService {
             LocalDate lendDate = LocalDate.parse(end);
             specPredicates.add((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThanOrEqualTo(root.get("date"), lendDate));
+        }
+        if(cid != null){
+            Optional<ClientEntity> client = clientRepository.findById(cid);
+            specPredicates.add((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("client"), client.get()));
         }
         return Specification.allOf(specPredicates);
     }
