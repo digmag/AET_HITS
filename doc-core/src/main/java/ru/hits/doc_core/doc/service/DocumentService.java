@@ -16,6 +16,7 @@ import ru.hits.common.security.JwtUserData;
 import ru.hits.common.security.exception.BadRequestException;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
+import ru.hits.common.security.exception.UnauthorizedException;
 import ru.hits.doc_core.client.entity.EmployeeEntity;
 import ru.hits.doc_core.client.repository.ClientRepository;
 import ru.hits.doc_core.client.repository.EmployeeRepository;
@@ -51,7 +52,7 @@ public class DocumentService {
         var user = (JwtUserData) authentication.getPrincipal();
         Optional<EmployeeEntity> employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
+            throw new UnauthorizedException("Пользователь не найден");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Пользователь не является администратором");
@@ -82,7 +83,7 @@ public class DocumentService {
         var user = (JwtUserData) authentication.getPrincipal();
         Optional<EmployeeEntity> employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
+            throw new UnauthorizedException("Пользователь не найден");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Пользователь не является администратором");
@@ -102,7 +103,7 @@ public class DocumentService {
         var user = (JwtUserData) authentication.getPrincipal();
         Optional<EmployeeEntity> employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
+            throw new UnauthorizedException("Пользователь не найден");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Пользователь не является администратором");
@@ -117,7 +118,15 @@ public class DocumentService {
 
 
     @Transactional
-    public ResponseEntity<?> createContract(ContractCreateDTO createDTO){
+    public ResponseEntity<?> createContract(ContractCreateDTO createDTO, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var admin = employeeRepository.findById(user.getId());
+        if(admin.isEmpty()){
+            throw new UnauthorizedException("Админ не найден");
+        }
+        if(!admin.get().isAdmin()){
+            throw new ForbiddenException("Пользователь не является админом");
+        }
         if(createDTO.getNumber() == null ||
         createDTO.getBankCode() == null ||
         createDTO.getClientId() == null ||
@@ -167,7 +176,10 @@ public class DocumentService {
                     0
             ));
             if(createDTO.getPrice() == null){
-                customPrice.updateAndGet(v -> (v + priceListPosition.get().getPrice()));
+                if(!createDTO.getVolume()){
+                    throw new BadRequestException("Нельзя создать документ без цены в договоре без объема.");
+                }
+                customPrice.updateAndGet(v -> (v + priceListPosition.get().getPrice()*pos.getCount()));
             }
         });
 
@@ -237,7 +249,7 @@ public class DocumentService {
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Работник не найден");
+            throw new UnauthorizedException("Работник не найден");
         }
         Specification<ContractEntity> spec = contractSearch(startDate, endDate, employee.get());
         List<ContractEntity> contracts = contractRepository.findAll(spec);
@@ -425,7 +437,7 @@ public class DocumentService {
         var user = (JwtUserData) authentication.getPrincipal();
         Optional<EmployeeEntity> employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Работник не найден");
+            throw new UnauthorizedException("Работник не найден");
         }
         var priceContract = priceContractRepository.findById(id);
         if(priceContract.isEmpty()){
@@ -460,6 +472,146 @@ public class DocumentService {
                 priceContract.get().getCount(),
                 priceContract.get().getDone(),
                 contract.isVolume()?priceContract.get().getCount()*priceContract.get().getPriceList().getPrice():priceContract.get().getPriceList().getPrice()
+        ));
+    }
+
+    public ResponseEntity<?> deleteContract(UUID id, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var employee = employeeRepository.findById(user.getId());
+        if(employee.isEmpty()){
+            throw new UnauthorizedException("Не найден работник");
+        }
+        if(!employee.get().isAdmin()){
+            throw new ForbiddenException("Пользователь не является админом");
+        }
+        var contract = contractRepository.findById(id);
+        if(contract.isEmpty()){
+            throw new NotFoundException("Контракт не найден");
+        }
+        priceContractRepository.findAllByContract(contract.get()).forEach(priceContract -> {
+            priceContractRepository.delete(priceContract);
+        });
+        contractRepository.delete(contract.get());
+        return ResponseEntity.ok("Удален");
+    }
+
+    public ResponseEntity<?> updateContract(ContractCreateDTO createDTO, UUID id, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        var admin = employeeRepository.findById(user.getId());
+        if(admin.isEmpty()){
+            throw new UnauthorizedException("Админ не найден");
+        }
+        if(!admin.get().isAdmin()){
+            throw new ForbiddenException("Пользователь не является админом");
+        }
+        if(createDTO.getNumber() == null ||
+                createDTO.getBankCode() == null ||
+                createDTO.getClientId() == null ||
+                createDTO.getSubject() == null ||
+                createDTO.getEmployeeId() == null ||
+                createDTO.getStartDate() == null ||
+                createDTO.getEndDoingDate() == null ||
+                createDTO.getEndLifeDate() == null ||
+                createDTO.getPricePositions() == null ||
+                createDTO.getIsEnd() == null ||
+                createDTO.getVolume() == null){
+            throw new BadRequestException("Все поля кроме цены обязательны к заполнению");
+        }
+        var client = clientRepository.findById(createDTO.getClientId());
+        if(client.isEmpty()){
+            throw new NotFoundException("Клиент не найден");
+        }
+        var employee = employeeRepository.findById(createDTO.getEmployeeId());
+        if(employee.isEmpty()){
+            throw new NotFoundException("Работник не найден");
+        }
+        if(!employee.get().isAdmin()){
+            throw  new ForbiddenException("Работник не является админом");
+        }
+        AtomicReference<Double> customPrice = new AtomicReference<>((createDTO.getPrice() != null?createDTO.getPrice():(double)0));
+        List<PriceListResponseDTO> priceListResponseDTOS = new ArrayList<>();
+
+        var contract = contractRepository.findById(id);
+        if(contract.isEmpty()){
+            throw new NotFoundException("Контракт не найден");
+        }
+        createDTO.getPricePositions().forEach(pos -> {
+            var pricelistEl = priceContractRepository.findById(pos.getId());
+            if(pricelistEl.isEmpty()){
+                throw new NotFoundException("Позиция с id "+ pos.getId()+" не найдена");
+            }
+            if(createDTO.getVolume()){
+                if(pos.getCount() == null || pos.getCount()==0){
+                    throw new BadRequestException("Выбраны договоры с объемом");
+                }
+            }
+            else{
+                if(pos.getCount()!=null){
+                    throw new BadRequestException("Выбраны договоры без объема");
+                }
+            }
+            pricelistEl.get().setCount(pos.getCount());
+            if(createDTO.getPrice() == null){
+                if(!createDTO.getVolume()){
+                    throw new BadRequestException("Нельзя создать документ без цены в договоре без объема.");
+                }
+                customPrice.updateAndGet(v -> (v + pricelistEl.get().getPriceList().getPrice()*pos.getCount()));
+            }
+            priceContractRepository.save(pricelistEl.get());
+            priceListResponseDTOS.add(new PriceListResponseDTO(
+                    pricelistEl.get().getId(),
+                    pricelistEl.get().getPriceList().getName(),
+                    pricelistEl.get().getPriceList().getPrice(),
+                    pricelistEl.get().getCount(),
+                    pricelistEl.get().getDone(),
+                    pricelistEl.get().getCount()!=null?pricelistEl.get().getPriceList().getPrice()*pricelistEl.get().getCount():pricelistEl.get().getPriceList().getPrice()
+
+            ));
+        });
+        ContractEntity contract1 = new ContractEntity(
+                contract.get().getId(),
+                createDTO.getNumber(),
+                contract.get().getDate(),
+                client.get(),
+                createDTO.getVolume(),
+                customPrice.get(),
+                createDTO.getStartDate(),
+                createDTO.getEndDoingDate(),
+                createDTO.getEndLifeDate(),
+                createDTO.getSubject(),
+                employee.get(),
+                createDTO.getIsEnd()
+        );
+        contractRepository.save(contract1);
+        return ResponseEntity.ok(new ContractResponseDTO(
+                contract1.getId(),
+                contract1.getNumber(),
+                contract1.getDate(),
+                new ClientShortResponseDTO(
+                        client.get().getId(),
+                        client.get().getFaceType(),
+                        client.get().getFullName(),
+                        client.get().getCEOFullName(),
+                        client.get().getINN(),
+                        client.get().getPhone(),
+                        client.get().getEmail()
+                ),
+                contract1.isVolume(),
+                contract1.getPrice(),
+                contract1.getStartDate(),
+                contract1.getEndDoingDate(),
+                contract1.getEndLifeDate(),
+                contract1.getSubject(),
+                new UserDTO(
+                        employee.get().getId(),
+                        employee.get().getFullName(),
+                        employee.get().getEmail(),
+                        employee.get().getStatus().getStatus(),
+                        employee.get().isAdmin(),
+                        employee.get().isVerification()
+                ),
+                contract1.isEnd(),
+                priceListResponseDTOS
         ));
     }
 }

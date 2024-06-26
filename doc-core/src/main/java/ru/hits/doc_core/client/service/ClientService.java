@@ -14,6 +14,7 @@ import ru.hits.common.security.JwtUserData;
 import ru.hits.common.security.exception.BadRequestException;
 import ru.hits.common.security.exception.ForbiddenException;
 import ru.hits.common.security.exception.NotFoundException;
+import ru.hits.common.security.exception.UnauthorizedException;
 import ru.hits.doc_core.client.entity.ClientEntity;
 import ru.hits.doc_core.client.entity.OPFEntity;
 import ru.hits.doc_core.client.entity.Requisites;
@@ -38,7 +39,7 @@ public class ClientService {
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Работник не найден");
+            throw new UnauthorizedException("Работник не найден");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Работник не является админом");
@@ -92,7 +93,7 @@ public class ClientService {
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Не удалось найти работника");
+            throw new UnauthorizedException("Не удалось найти работника");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Работник не является администратором");
@@ -156,7 +157,7 @@ public class ClientService {
     public ResponseEntity<?> delete (Authentication authentication,UUID id){
         var user = (JwtUserData) authentication.getPrincipal();
         if(employeeRepository.findById(user.getId()).isEmpty()){
-            throw new NotFoundException("Работник не найден.");
+            throw new UnauthorizedException("Работник не найден.");
         }
         if(!employeeRepository.findById(user.getId()).get().isAdmin()){
             throw new ForbiddenException("Пользователь не является админом.");
@@ -268,7 +269,7 @@ public class ClientService {
         var user = (JwtUserData) authentication.getPrincipal();
         var employee = employeeRepository.findById(user.getId());
         if(employee.isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
+            throw new UnauthorizedException("Пользователь не найден");
         }
         if(!employee.get().isAdmin()){
             throw new ForbiddenException("Пользователь не является администратором");
@@ -278,5 +279,27 @@ public class ClientService {
         }
         opfRepository.save(opf);
         return ResponseEntity.ok(opf);
+    }
+    public ResponseEntity<?> bankRequisitsClient(UUID id){
+        var client = clientRepository.findById(id);
+        if(client.isEmpty()){
+            throw new NotFoundException("Клиент не найден");
+        }
+        List<ResponseRequisite> list = new ArrayList<>();
+        requisiteRepository.findAllByClient(client.get()).forEach(requisites -> {
+            list.add(new ResponseRequisite(
+                    requisites.getId(),
+                    requisites.getBic().getBankName(),
+                    requisites.getBill()
+            ));
+        });
+        return ResponseEntity.ok(list);
+    }
+
+    public ResponseEntity<?> listClietnsSelector(){
+        List<ClientSelectorDTO> clientSelectorDTOS = new ArrayList<>();
+        clientRepository.findAll().forEach(client ->
+                clientSelectorDTOS.add(new ClientSelectorDTO(client.getId(), client.getShortName())));
+        return ResponseEntity.ok(clientSelectorDTOS);
     }
 }

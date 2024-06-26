@@ -62,4 +62,13 @@ public class ClientController {
     public ResponseEntity<?> addOpf(@RequestBody OPFEntity opf, Authentication authentication){
         return clientService.addOPF(opf, authentication);
     }
+    @GetMapping("/requisits/{id}")
+    public ResponseEntity<?> bankRequisitsClient(@PathVariable UUID id){
+        return clientService.bankRequisitsClient(id);
+    }
+
+    @GetMapping("/list/selector")
+    public ResponseEntity<?> clientEasyList(){
+        return clientService.listClietnsSelector();
+    }
 }

@@ -64,18 +64,18 @@ public class DocumentController {
     }
 
     @PostMapping("/contract/create")
-    public ResponseEntity<?> contractCreate(@RequestBody ContractCreateDTO createDTO){
-        return documentService.createContract(createDTO);
+    public ResponseEntity<?> contractCreate(@RequestBody ContractCreateDTO createDTO, Authentication authentication){
+        return documentService.createContract(createDTO, authentication);
     }
 
     @PutMapping("/contract/update/{id}")
-    public ResponseEntity<?> contractUpdate(@PathVariable UUID id, @RequestBody ContractCreateDTO createDTO){
-        return null;
+    public ResponseEntity<?> contractUpdate(@PathVariable UUID id, @RequestBody ContractCreateDTO createDTO, Authentication authentication){
+        return documentService.updateContract(createDTO, id, authentication);
     }
 
     @DeleteMapping("/contract/delete/{id}")
-    public ResponseEntity<?> contractDelete(@PathVariable UUID id){
-        return null;
+    public ResponseEntity<?> contractDelete(@PathVariable UUID id, Authentication authentication){
+        return documentService.deleteContract(id, authentication);
     }
 
     @PutMapping("/contract/done/{id}")
