@@ -19,7 +19,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: bic
-                  type: uuid
+                  type: integer
                   constraints:
                     nullable: false
               - column:
