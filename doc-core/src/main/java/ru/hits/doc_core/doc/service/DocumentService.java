@@ -468,7 +468,8 @@ public class DocumentService {
         DoneJob doneJob = new DoneJob(
                 UUID.randomUUID(),
                 priceContract.get(),
-                employee.get()
+                employee.get(),
+                LocalDate.now()
         );
         doneJobRepository.save(doneJob);
         priceContract.get().setDone(priceContract.get().getDone()+1);
@@ -653,7 +654,7 @@ public class DocumentService {
                         )
                 ));
                 employeeReportDTO.setSum(employeeReportDTO.getSum()+doneJob.getService().getDone() * doneJob.getService().getPriceList().getPrice());
-                allSum.updateAndGet(v -> v + employeeReportDTO.getSum() + doneJob.getService().getDone() * doneJob.getService().getPriceList().getPrice());
+                allSum.updateAndGet(v -> v + doneJob.getService().getDone() * doneJob.getService().getPriceList().getPrice());
             });
             employeeReportDTO.setContractReport(contractReportDTOS);
             employeeReportDTOS.add(employeeReportDTO);
