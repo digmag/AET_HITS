@@ -20,9 +20,11 @@ import ru.hits.doc_core.client.entity.EmployeeEntity;
 import ru.hits.doc_core.client.repository.ClientRepository;
 import ru.hits.doc_core.client.repository.EmployeeRepository;
 import ru.hits.doc_core.doc.entity.ContractEntity;
+import ru.hits.doc_core.doc.entity.DoneJob;
 import ru.hits.doc_core.doc.entity.PriceContractEntity;
 import ru.hits.doc_core.doc.entity.PriceListEntity;
 import ru.hits.doc_core.doc.repository.ContractRepository;
+import ru.hits.doc_core.doc.repository.DoneJobRepository;
 import ru.hits.doc_core.doc.repository.PriceListRepository;
 import ru.hits.doc_core.doc.repository.PriceContractRepository;
 
@@ -39,6 +41,7 @@ public class DocumentService {
     private final ContractRepository contractRepository;
     private final PriceContractRepository priceContractRepository;
     private final ClientRepository clientRepository;
+    private final DoneJobRepository doneJobRepository;
 
     @Transactional
     public ResponseEntity<?> createPriceListPosition(PriceListCreateDTO priceListCreateDTO, Authentication authentication){
@@ -418,7 +421,12 @@ public class DocumentService {
     }
 
     @Transactional
-    public ResponseEntity<?> makeDone(UUID id){
+    public ResponseEntity<?> makeDone(UUID id, Authentication authentication){
+        var user = (JwtUserData) authentication.getPrincipal();
+        Optional<EmployeeEntity> employee = employeeRepository.findById(user.getId());
+        if(employee.isEmpty()){
+            throw new NotFoundException("Работник не найден");
+        }
         var priceContract = priceContractRepository.findById(id);
         if(priceContract.isEmpty()){
             throw new NotFoundException("Позиция не найдена");
@@ -437,6 +445,12 @@ public class DocumentService {
                 throw new BadRequestException("Сумма выполненой работы не должна привышать суммы договора");
             }
         }
+        DoneJob doneJob = new DoneJob(
+                UUID.randomUUID(),
+                priceContract.get(),
+                employee.get()
+        );
+        doneJobRepository.save(doneJob);
         priceContract.get().setDone(priceContract.get().getDone()+1);
         priceContractRepository.save(priceContract.get());
         return ResponseEntity.ok(new PriceListResponseDTO(

@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: create-token
+      id: create-done-job
       author: Dmitry Slabukhin
       changes:
         - createTable:
-            tableName: token
+            tableName: done_job
             columns:
               - column:
                   name: id
@@ -13,18 +13,24 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: token_value
-                  type: text
+                  name: service
+                  type: uuid
                   constraints:
                     nullable: false
               - column:
-                  name: employee_id
+                  name: employee
                   type: uuid
                   constraints:
                     nullable: false
         - addForeignKeyConstraint:
-            baseTableName: token
-            baseColumnNames: [ employee_id ]
+            baseTableName: done_job
+            baseColumnNames: [ service ]
+            referencedTableName: price_contract
+            referencedColumnNames: [ id ]
+            constraintName: FK_service_done
+        - addForeignKeyConstraint:
+            baseTableName: done_job
+            baseColumnNames: [ employee ]
             referencedTableName: employee
             referencedColumnNames: [ id ]
-            constraintName: FK_employee_Token
+            constraintName: FK_employee_done
