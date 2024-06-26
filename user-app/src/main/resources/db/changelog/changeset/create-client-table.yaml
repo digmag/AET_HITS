@@ -68,12 +68,6 @@ databaseChangeLog:
                   type: text
         - addForeignKeyConstraint:
             baseTableName: client
-            baseColumnNames: [ bic ]
-            referencedTableName: bic
-            referencedColumnNames: [ code ]
-            constraintName: FK_client_bic
-        - addForeignKeyConstraint:
-            baseTableName: client
             baseColumnNames: [ opf ]
             referencedTableName: opf
             referencedColumnNames: [ id ]
