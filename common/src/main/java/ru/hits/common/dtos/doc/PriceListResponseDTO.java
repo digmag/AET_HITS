@@ -14,5 +14,6 @@ public class PriceListResponseDTO {
     private String name;
     private Double price;
     private Integer count;
+    private Integer done;
     private Double sum;
 }

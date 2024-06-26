@@ -27,6 +27,12 @@ databaseChangeLog:
                   type: integer
                   constraints:
                     nullable: true
+              - column:
+                  name: done
+                  type: integer
+                  constraints:
+                    nullable: false
+                    defaultValue: 0
         - addForeignKeyConstraint:
             baseTableName: price_contract
             baseColumnNames: [ price_list ]

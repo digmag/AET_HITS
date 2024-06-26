@@ -36,6 +36,11 @@ public class ClientController {
         return clientService.list(page);
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(@RequestBody CreateDTO createDTO, @PathVariable UUID id){
+        return null;
+    }
+
     @GetMapping("/bic")
     public ResponseEntity<?> bicList(@RequestParam(name = "name", defaultValue = "")String name){
         return clientService.getBic(name);

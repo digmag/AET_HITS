@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.common.dtos.contract.ContractCreateDTO;
 import ru.hits.common.dtos.doc.PriceListCreateDTO;
-import ru.hits.doc_core.doc.service.DocumentService;
 
 import java.util.UUID;
 
@@ -42,9 +41,13 @@ public class DocumentController {
 
 
     @GetMapping("/contract")
-    public ResponseEntity<?> listOfContracts(/*Добавить фильтры*/){
+    public ResponseEntity<?> listOfContracts(
+            Authentication authentication,
+            @RequestParam(name = "startDate", defaultValue = "") String startDate,
+            @RequestParam(name = "endDate", defaultValue = "") String endDate,
+            @RequestParam(name = "client", defaultValue = "") UUID id){
         //Получение списка договоров
-        return documentService.listOfContracts();
+        return documentService.listOfContracts(authentication,startDate,endDate,id);
     }
 
     @GetMapping("/contract/{id}")
@@ -62,5 +65,20 @@ public class DocumentController {
     @PostMapping("/contract/create")
     public ResponseEntity<?> contractCreate(@RequestBody ContractCreateDTO createDTO){
         return documentService.createContract(createDTO);
+    }
+
+    @PutMapping("/contract/update/{id}")
+    public ResponseEntity<?> contractUpdate(@PathVariable UUID id, @RequestBody ContractCreateDTO createDTO){
+        return null;
+    }
+
+    @DeleteMapping("/contract/delete/{id}")
+    public ResponseEntity<?> contractDelete(@PathVariable UUID id){
+        return null;
+    }
+
+    @PutMapping("/contract/{cid}/done/{pid}")
+    public ResponseEntity<?> makeDone(@PathVariable UUID cid, @PathVariable UUID pid){
+        return null;
     }
 }

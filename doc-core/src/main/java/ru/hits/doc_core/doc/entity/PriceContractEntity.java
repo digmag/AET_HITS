@@ -27,4 +27,6 @@ public class PriceContractEntity {
     private ContractEntity contract;
 
     private Integer count;
+
+    private Integer done;
 }
