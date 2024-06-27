@@ -100,7 +100,7 @@ services:
     environment:
       - REACT_APP_API_URL=84.201.140.78
     networks:
-      - my_network
+      - my-network
 volumes:
   db_data:
 networks:
