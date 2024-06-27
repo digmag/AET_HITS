@@ -209,7 +209,7 @@ public class ClientService {
         }
         if(!name.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get("shortName"), name));
+                    criteriaBuilder.like(root.get("fullName"), name));
         }
         if(!email.isEmpty()){
             spec.add((root, query, criteriaBuilder) ->
