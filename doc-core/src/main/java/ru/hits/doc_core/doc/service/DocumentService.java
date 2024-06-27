@@ -150,9 +150,6 @@ public class DocumentService {
         if(employee.isEmpty()){
             throw new NotFoundException("Работник не найден");
         }
-        if(!employee.get().isAdmin()){
-            throw  new ForbiddenException("Работник не является админом");
-        }
         AtomicReference<Double> customPrice = new AtomicReference<>((createDTO.getPrice() != null?createDTO.getPrice():(double)0));
         List<PriceContractEntity> priceContractEntities = new ArrayList<>();
         createDTO.getPricePositions().forEach(pos -> {
