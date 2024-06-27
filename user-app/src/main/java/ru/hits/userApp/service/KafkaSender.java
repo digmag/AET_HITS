@@ -25,7 +25,7 @@ public class KafkaSender {
                 "<html>" +
                         "<body style='display: flex; flex-direction: row; justify-content: center;'>"+
                         "<h1>Для подтверждения своего аккаунта перейдите по ссылке ниже</h1>"+
-                        "<a>http://localhost:5000/verification?id="+employee.getId()+"</a>"+
+                        "<a>http://84.201.140.78:5000/verification?id="+employee.getId()+"</a>"+
                         "</body>"+
                         "</html>",
                 pool
@@ -37,7 +37,7 @@ public class KafkaSender {
         kafkaTemplate.send("recovery", new MessageDTO(
                 employee.getEmail(),
                 "Письмо для восстановления пароля",
-                "Для восстановления пароля перейдите по ссылке: http://localhost:5000/recovery/"+id,
+                "Для восстановления пароля перейдите по ссылке: http://84.201.140.78:5000/recovery/"+id,
                 pool
         ));
     }
