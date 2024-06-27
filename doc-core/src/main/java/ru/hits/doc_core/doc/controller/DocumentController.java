@@ -34,7 +34,7 @@ public class DocumentController {
         return documentService.editPriceList(priceListElement, id, authentication);
     }
 
-    @DeleteMapping("/price")
+    @DeleteMapping("/price/{id}")
     public ResponseEntity<?> deleteFromPriceList(@PathVariable UUID id, Authentication authentication){
         //Удаление из прайслиста
         return documentService.deletePriceList(id, authentication);
