@@ -86,7 +86,21 @@ services:
       - KAFKA_CFG_MESSAGE_MAX_BYTES=33554432
     networks:
       - my-network
-
+  front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: front
+    ports:
+      - '5000:3000'
+    depends_on:
+      - user-app
+      - doc-core
+      - notification
+    environment:
+      - REACT_APP_API_URL=84.201.140.78
+    networks:
+      - my_network
 volumes:
   db_data:
 networks:
