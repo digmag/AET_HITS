@@ -88,7 +88,7 @@ services:
       - my-network
   front:
     build:
-      context: .
+      context: Front-end_mothers_dev
       dockerfile: Dockerfile
     container_name: front
     ports:
