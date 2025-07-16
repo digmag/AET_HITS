@@ -3,7 +3,7 @@ version: "3"
 services:
   db:
     image: postgres:latest
-    container_name: postgres_db
+    container_name: postgres_db1
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: root
@@ -84,21 +84,6 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_MESSAGE_MAX_BYTES=33554432
-    networks:
-      - my-network
-  front:
-    build:
-      context: Front-end_mothers_dev
-      dockerfile: Dockerfile
-    container_name: front
-    ports:
-      - '5000:3000'
-    depends_on:
-      - user-app
-      - doc-core
-      - notification
-    environment:
-      - REACT_APP_API_URL=84.201.140.78
     networks:
       - my-network
 volumes:
